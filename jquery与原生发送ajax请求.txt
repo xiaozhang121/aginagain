@@ -1,0 +1,71 @@
+1.原生
+ // 1 创建xhr对象
+        var xhr = new XMLHttpRequest();
+        // 2 调用open：设置请求方式和请求地址
+        //    - 如果希望设置get请求的请求参数，需要放置在open()参数2地址的最后位置
+        //    - 书写方式为：  地址?名=值&名=值....
+        //    - 名称说明： 名=值&名=值称为url编码格式  urlencoded
+        xhr.open('GET', 'http://www.liulongbin.top:3006/api/getbooks?id=3&name=jack&age=18&gender=男');
+        // 3 调用send: 发送请求，这一步是异步操作
+        xhr.send();
+
+        // 4 设置事件，监听请求的各种状态
+        xhr.onreadystatechange = function () {
+            // 4.1 检测xhr.readyState取值和xhr.status取值
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                // 4.2 接收响应的数据即可
+                console.log(xhr.responseText);
+
+            }
+        };
+
+1.query
+ $.get('http://www.liulongbin.top:3006/api/getbooks', { id: 2, name: 'jack' }, function (res) {
+      console.log(res);
+    });
+
+2.封装ajax函数
+function ajax(options){
+var xhr = new XMLHttpRequest()
+var data = urlencoded(options.data)//统一保存数据
+var type = options.type.toUpperCase()//统一大小写
+if(type==='GET'){
+xhr.open('GET',options.url+'?'+data)
+xhr.send()
+}else if(type==='POST'){
+xhr.open('POST',options.yrl)
+xrh.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+xhr.send()atad
+}
+xhr.onreadystatechange = function(){
+if(xhr.readyState===4&&xhr.status===200){
+var res = JSON.parse(xhr.responseText);
+options.success(res)
+}
+}
+}
+
+function urlencoded(obj){
+var arr = [];
+for (var k in obj){
+arr.push(k+'='+obj[k])
+}
+return arr.join('&')
+}
+
+
+ajax({
+type:'post',
+url:'http://www.liulongbin.top:3006/api/addbook',
+data:{
+name:'1',
+age:2
+},
+success:function(res){
+console.log(res)
+}
+})
+
+
+
+

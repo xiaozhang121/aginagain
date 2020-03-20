@@ -1,0 +1,545 @@
+1.----------------------------------------------------------------------------------------------------------------
+node.js:
+是js运行时的运行环境;
+和浏览器的关系:
+浏览器不但可以执行ECMAScript还有处理DOM和BOM的能力;
+nodejs是一个容器 不能使用window对象 也不能操作DOM
+
+nodejs模块:
+核心模块(Array,Math,Date);类似于内置对象 ;
+自定义模块
+第三方模块
+
+2.-------------------------------------------------------------------------------------------------------------------------------
+
+
+**************************************fs模块:
+文件内容读取:
+异步:
+const fs = require('fs');
+
+fs.readFile('文件路径',(utf8),(err,data))=>{
+if(err)throw err;
+log(data);
+}
+第一个参数文件路径 相对绝对都可以
+第二个参数配置项 可选参数 一般设为'utf8'如果不设置文件内容会以二进制进行返回;
+第三个为触发后的回调函数,两个参数err data;
+读取成功:
+err:null,data:文件内容;
+读取失败:
+err:错误对象,data:undefined
+同步:
+const fs = require('fs');
+let fs = fs.readFileSync('文件路径','utf8');
+不是通过回调函数来获取值 像普通函数调用一样 直接获取返回值;
+
+__dirname:获取当前被执行文件的文件夹所处的绝对路径;
+__filename:获取当前被执行文件的绝对路径;
+
+
+
+
+**************************************path模块:
+用来处理路径问题 拼接 去后缀名
+
+path.join(__dirname,'文件地址');
+
+
+
+****************************************http模块:
+nodejs核心模块 通过代码创建一个web服务器;
+
+先引入模块 再创建服务:
+引入模块 require  创建服务 creatrServer();
+
+
+1.引入http模块:
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+2.创建服务:
+http.createServer((req,res)=>{
+      	2.1//首页的请求地址通常为'/'    '/index.html';
+      	if(req.url==='/' ||req.url==='/index.html'){
+		xxxx
+}
+      	2.2读取首页index.html文件响应给客户端
+      	var data = fs.readFileSync(path.join(__dirname,'要补充的地址'));
+	2.3在响应之前进行表头设置, 告诉客户端相应的数据是什么形式;    
+	res.setHeader('Content-Type','text/html;charset=utf-8(MIME详情见下表)')
+	2.4res.end()进行响应
+	res.end(data);
+})
+.listen(8000,()=>{
+log('监听成功');
+})
+
+*********************************************url模块:
+1.引入地址模块 
+const url = require('url');
+let urlobj = url.parse('http://itcast.cn:80/schools/students?id=18&name=zs#photo');
+console.log(urlobj);
+输出:
+Url {
+  protocol: 'http:',
+  slashes: true,
+  auth: null,
+  host: 'itcast.cn:80',
+  port: '80',
+  hostname: 'itcast.cn',
+  hash: '#photo',
+  search: '?id=18&name=zs',
+  query: 'id=18&name=zs',
+  pathname: '/schools/students',
+  path: '/schools/students?id=18&name=zs',
+  href: 'http://itcast.cn:80/schools/students?id=18&name=zs#photo'
+}
+
+
+********************************************querystring模块:
+***************************************************************用来对url中查询的字符串进行处理;
+1.引入模块
+const qs = require('querystring');
+let urlobj = qs.parse('id=18&name=zs');
+console.log(urlobj);
+输出结果:
+{ id: '18', name: 'zs' }
+
+get请求的参数附加到url中 可以使用url模块来提取用户中url的参数部分.再使用querystring模块来去除具体的参数值
+
+const http = require('http');
+const queryString = require('querystring');
+const url = require('url');
+
+http.createServer((req,res)=>{
+var {pathname,query} = url.parse(req.url);
+//                                  此时得到的数据是url的一个对象里面有path href pathname query search 等的属性
+
+}) 
+
+
+9.------------------------------------------------------------------------------------------------------------
+常见MIME类型
+{
+ "css": "text/css",
+ "gif": "image/gif",
+ "html": "text/html",
+ "ico": "image/x-icon",
+ "jpeg": "image/jpeg",
+ "jpg": "image/jpeg",
+ "js": "text/javascript",
+ "json": "application/json",
+ "pdf": "application/pdf",
+ "png": "image/png",
+ "svg": "image/svg+xml",
+ "swf": "application/x-shockwave-flash",
+ "tiff": "image/tiff",
+ "txt": "text/plain",
+ "wav": "audio/x-wav",
+ "wma": "audio/x-ms-wma",
+ "wmv": "video/x-ms-wmv",
+ "xml": "text/xml"
+}
+
+
+
+日期日历/引入boots框架/引入翻页框架
+
+10.--------------------------------------------------------------------------------------------------------------
+***********************************************************************************get类型的接口:带参数:
+功能:获取用户传入的参数 并以json字符串格式返回 在返回的信息中加上时间戳
+url.parse
+qusryString是为了将对象的一个属性继续展开成为一个对象
+const http = require('http');
+const queryString = require('querystring');
+const url = require('url');
+
+//创建服务器
+http.createServer((req, res) => {
+//pathname为请求方式 query为获取的数据
+//url.parse是为了将地址展开成一个对象;
+    var { pathname, query } = url.parse(req.url);
+//将获取的url对象中的query属性转换成为对象
+    var obj = queryString.parse(query);
+    if (pathname === '/get' && req.method === 'GET') {
+        res.setHeader('content-type', 'application/json');
+        obj.d = Date.now();
+        res.end(JSON.stringify(obj));
+    } else {
+        res.setHeader('content-type', 'text/html;charset=utf-8');
+        res.end('hello');
+    }
+}).listen(8888, () => {
+    console.log('8888成功');
+}
+11.------------------------------------------------------------------------------------------------------------------
+*********************************************************************************post类型接口
+post和get接口区别:
+1类型不同:可以通过req.method判断;
+2传参不同:get请求参数在请求行中;post请求参数在请求体中
+chunk块
+
+12.------------------------------------------------------------------------------------------------------------------
+*********************************************************************************自定义模块
+1.现在另一个js文件中放入要写入的自定义构造函数,属性;
+const myPI = 3;
+function add(a,b){
+return a+b
+}
+2.在另一个js文件的末尾写module.exports(固定写法),将函数名与属性名放入;
+module.exports = {
+	myPI,
+	add
+};
+3.在当前的js文件中引入,和引入核心模块方法相似  但是括号内放的是相对路径
+const myMath = require('./myMath');
+4.调用时当做对象的一个方法调用
+let sum = myMath.add(1,2);
+log
+
+导出模块的两种方式:
+1.exports;
+2.module.exports;
+exports是module.exports的别名;
+使用方法一样
+区别:
+写在esports上的对象无法导出;
+
+13.--------------------------------------------------------------------------------------------------------------------------
+npm的使用
+npm全程 Node Package Manager (node包管理器);
+nodejs中一个模块就是一个单独的js文件,包是多个模块的集合;
+
+1.npm init -y初始化 会自动创建package.json目录;
+2.npm i 包名 进行包的安装 比如: npm i jquery;   npm i express
+3.通过 npm uninstall 包名 删除包
+14.--------------------------------------------------------------------------------------------------------------------------
+require的加载机制:
+1.执行这个文件中的代码;
+2.将这个文件中的module.exports对象中的内容返回来;
+3.在当前js中使用模块
+
+require有限加载缓存中的模块
+如果是相对路径 则根据路径加载自定义模块 并缓存;
+如果不是相对路径 则加载核心模块 并缓存;
+如果不是自定义模块也不是核心模块 则加载第三方模块;
+
+js的执行机制:
+1.同步和异步任务分别进入不同的执行"场所"，同步的进入主线程，异步的进入Event Table并注册函数。
+2.当指定的事情完成时，Event Table会将这个函数移入Event Queue。
+3.主线程内的任务执行完毕为空，会去Event Queue读取对应的函数，进入主线程执行。
+4.上述过程会不断重复，也就是常说的Event Loop(事件循环)。
+
+let data = [];
+$.ajax({
+    url:www.javascript.com,
+    data:data,
+    success:() => {
+        console.log('发送成功!');
+    }
+})
+console.log('代码执行结束');
+上面是一段简易的ajax请求代码：
+ajax进入Event Table，注册回调函数success。
+执行console.log('代码执行结束')。
+ajax事件完成，回调函数success进入Event Queue。
+主线程从Event Queue读取回调函数success并执行。
+
+15.-------------------------------------------------------------------------------------------------------
+http有一个特性:无状态,客户端对服务端的每次请求都是'初次见面';
+如果希望服务端可以识别客户端的请求 需要进行特殊处理;
+方式:
+客户端第一次请求服务端后,服务端进行响应时给客户端发小票,下发的操作在响应头中是一个set-cookie,
+客户端接收到响应信息后,浏览器会自动读取cookie并保持在本地,以后再次发送请求时,浏览器会自动将cookie信息添加到请求头中发送给服务端;
+
+
+***************************************************************模拟登录
+const express = require('express');
+const bp = require('body-parser');
+
+let app = express();
+//配置bp模块
+bp.use(bp.urlencoded({extended:false}));
+
+//静态资源托管
+app.use(express.static('./public'));
+//设置登录接口进行登录信息监测
+app.post('/login',(req,res)=>{
+//保存用户名和密码
+let {username:uname,password:pwd}=req.body;
+//进行检测
+if(uname ==='admin'&&pwd==='123456'){
+//设置表头 cookie;
+
+
+//登录成功时应该让用户看到首页index.html;
+//客户端请求a.html,服务器认为a有问题,服务端设置重定向让客户端查看b页面;
+//res.send({
+status:200,
+msg:'登录成功'
+});//
+
+//重定向/302
+res.redirect('http://localhost:8000/index.html');////////与location.href区别?
+}else {
+res.send({
+console.log('登录失败')
+})
+}
+res.send('ok');
+});
+//设置登录状态监测接口//req.headers.cookie   传统获取方式需要字符串截取/cookie需要转码才能输出否则是undefined;
+//使用cookie-parser中间件对cookie数据进行转换
+//使用中间件对所有的数据进行处理/处理后时对象线形式的cookie数据;
+if(req.cookies.loginStatis==='yes'){
+res.send({
+status:200,
+msg:'已经登录过'
+})}else{
+res.send({
+status:404.
+msg:'没有登录'
+})
+}
+
+app.listen(8000,()=>{console.log(111)});
+
+
+会话技术:
+会话控制能够将数据持久化的保存在浏览器,从而让浏览器和服务器进行交互时产生连续性;
+会话控制分类:
+cookie:将数据保存到客户端;  
+session(会话):将数据保存到服务器
+
+res.cookie('liginStatus','yes',{
+//基本设置方式  res.cookie(名,值);具体时间设置:res.cookie(名,值,{expriese:new Date()});
+expries://new Date(+new Date()+3*60*60*1000);//当前时间 立刻过期  3小时可以随便设置
+            
+})
+
+cookie是键值对格式的字符串
+
+普通cookie的数据保存在客户端中 用户可以随意查看修改
+如果用户手动设置loginStatus为yes即使没有登录 也可以访问index.html
+
+普通cookie不安全 session的本质就是cookie的特殊用法;
+数据保存在服务端 将保存数据的区域标记(称为session)下次发送给客户端保存;
+请求服务端时 这个标记也会发送到服务端 服务端在进行数据操作
+
+16.--------------------------------------------------------------------------------------------------------------
+extname 获取当前请求静态资源后缀
+
+17.-------------------------------------------------------------------------------------------------------------
+静态资源托管:
+把所有的静态资源放在同一个文件夹下;
+url.parse()传入参数2为true时，query的值为对象结构(常用方式)
+
+18.----------------------------------------------------------------------------------------------------------------
+静态资源管理原生与express方法对比:
+原生:
+1.创建服务器
+2.地址进行检测
+3.地址拼接/筛选
+4.fs读取地址
+5.设置响应头 res.setHeader('Content-Type','text/html;charset=utf-8');
+6.设置响应体 res.end();
+7.静态资源原生处理(req.url.startsWith(/静态资源所在文件夹/));
+8.获取当前请求的静态资源的后缀(path.extname(req.url));进行响应头设置;
+9.进行判断,switch(){case };  res.setHeader();
+10.根据地址读取内容 path.join();   fs.readFileSync();  res.end();
+11.监听端口
+
+express:
+1.引入express  
+2.创建一个express实例  const app = express();
+3.设置网站的默认静态资源  app.use(express.static(path.join(__dirname,'public')));
+4.对分页的分页的静态资源托管 app.use('分页后缀',express.static(path.join(__dirname,'./pc')));
+5.监听端口
+19.---------------------------------------------------------------------------------------------------------------
+express发送get请求与nodejs发送get请求对比:
+
+*******************************************************************原生:
+const http = require('http');
+//创建服务器
+http.createServer((req,res)=>{
+//判断是否为get
+if(req.url==='/get'&&req.method==='GET'){
+//设置响应数据
+const datas = {name:jack,age:20};
+//设置表头格式/告诉客户端响应的数据是JSON格式
+res.setHeader('Content-Type','application/json;charset=utf-8');
+//将数据转为JSON格式/必须要转否则无法发送响应数据
+res.send(JSON.stringify(datas));
+}
+}).listen(8000,()=>{
+console.log(success)});
+
+********************************************************************express:
+//引入模块
+const express = require('express');
+//创建express实例
+const app = express();
+//设置get接口(参数1:接口地址/参数2:回调函数,用来设置接口功能);
+app.get('/get',(req,res)=>{
+
+//express给req设置了一个属性是query,是get请求参数的对象形式/相当于  var query = url.parse(req.url);var obj = queryString.parse(query);
+//express响应内容的方式有end sed json/使用send什么都可以发
+
+res.send({name:'jack',age:20});
+});
+app.listen(8000,()=>{console.log('sss')});
+20.---------------------------------------------------------------------------------------------------------
+express发送post请求与nodejs发送的区别:
+
+原生:
+const http = require('http');
+//创建服务器
+http.createServer((req,res)=>{
+if(req.url==='/post'&&req.method==='POST'){
+//创建空对象接收
+let dataStr = '';
+//req有两个事件 data 和end/post请求数据是buffer码的拼接
+req.on('data',(tempData)=>{
+
+//dataStr实际的样子%E8%AE%A2%E5%8D%95
+dataStr +=tempData;
+});
+req.on('end',()=>{
+//将接收到的请求 转成对象
+let dataObj = querystring.parse(dataStr);
+//设置表头
+res.setHeader('Content-Type','application/json;charset=utf-8');
+let bj = {name:'jack',age:20};
+res.end(JSON.stringify(bj));
+})
+}
+}).listen(8000,()=>{
+console.log('sss');
+})
+
+express:
+const express = require('express');
+const bp = require('body-parse');//处理post请求的参数可以使用body-parse包
+const app = express();
+app.use(bp.urlencoded({extended:false}));//中间件/使用url之前需要进行编码转换,bp默认采用的是url编码转换
+//设置post接口
+app.post('post',(req,res)=>{
+let bj = {name:'jack',age:20};
+res.send(bj);
+});
+app.listen(8000,()=>{console.log('sss')});
+
+
+post 原生的接收数据必须用buffer拼接再转码    express接收是创建body-parser   然后进行设置处理  req.body存放的就是post的请求欧参数
+extended: false：表示使用系统模块querystring来处理,
+extended: true：表示使用第三方模块qs来处理
+
+21.-------------------------------------------------------------------------------------------------------------
+图片上传
+//引入模块
+const express = require('express');
+const multer = require('multer');//用来进行上传文件的接收处理的包
+const random = require('string-random'); //用来生成随机字符串的包
+//创建express实例
+const app = express();
+//使用multer之前需要先进行配置
+//基本设置方式只设置存储位置即可(文件保存后没有后缀名);let upload = multer({dest:'./uploads'});
+//详细设置方式:
+let upload = multer({
+storage:multer.storage:multer.diskStorage({
+destination:(req,file,callback)=>{
+//参数1为设置错误信息;
+//参数2为存储地址
+callback(null,'地址');
+},
+filename:(req,file,callback)=>{
+//参数2:是最终设置给文件的名字
+//设置随机的名+后缀信息即可
+callback(null,random(18)+file.originalname);
+}
+})
+});
+//设置接口
+app.post('/fileupload',upload.single('file'),(req,res)=>{
+res.send('ok');
+});
+app.listen(8000,()=>{
+console.log('sss')
+})
+
+22.-------------------------------------------------------------------------------------------------------------------------------------
+app.use()通过app.use设置中间件.在具体接口代码执行前 对请求进行处理操作
+app.use((req,res,next)=>{
+next();
+});
+//针对getCate接口提前处理的中间件
+app.use('/get',(req,res,next)=>{
+next();
+});
+23.---------------------------------------------------------------------------------------------------------------------------------------
+自定义模块/ajax post get/body-parser
+
+路由中间件:
+
+24.--------------------------------------------------------------------------------------------------------------
+MySQL:
+查询功能:只有查询才会得到表信息
+select * from study
+select name from study
+select age from study
+
+select * from study where age <30
+select * from study where age=20 or id = 6;
+
+新增功能:
+insert into study values(null,'张三',21);
+insert in study (name,age) values('张2',36);
+修改功能:需求上必须设置条件 否则会修改全部数据
+update study set name = '李4' where id=7;
+删除功能:
+delete from study where id=5
+
+node操作数据库:
+1引入mysqll第三方模块
+const mysql = require('mysql');
+2连接数据库
+let con = mysql.createConnection({
+host:'localhost',//数据库地址
+port:3306,//默认端口号3306
+user:'root',//用户名 默认root
+password:'root'//密码默认为root
+database:'demo'//要使用的数据库名称
+});
+3调用con.query()进行sql语句执行
+参数1:sql语句,字符串
+参数2:可选信息
+参数3:回调函数
+查询演示:
+let sql = 'select*from study';
+con.query(sql,(err,result)=>{
+console.log('hah');
+});
+3增删改
+let sql = ''eleted from study whrere id=8;
+con.query(sql,setult)
+
+25.-------------------------------------------------------------------------------------------------------------------------------
+过滤器:
+.use();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

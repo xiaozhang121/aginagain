@@ -1,0 +1,42 @@
+
+
+Git命令操作指导
+--------------------------------------------------------
+
+git checkout branch 切换到branch分支，其中branch为分支名，例如dev、master
+
+git checkout -b branch 新建branch分支并切换过去
+
+git branch -a 查看所有存在的分支
+
+git fetch 拉取远程库的版本信息
+
+git status 查看本地代码修改情况
+
+git add file 添加修改文件file到待提交列表
+
+git add . 添加所有修改文件的待提交列表
+
+git commit -m "" 提交修改文件到本地库
+
+git rebase origin/dev 同步远程代码到本地
+
+git push origin dev 将本地代码推送到远程分支上 如果rebase发生冲突，那么需要先解决冲突，然后执行
+
+如果有冲突:
+先解决冲突
+
+git add file 添加文件到本地库
+
+git rebase --continue 继续执行代码同步和合并
+
+git push origin dev 将解决完冲突的文件推送到远程分支git 
+
+git config --global credential.helper manager 免输入密码
+
+
+
+
+
+
+

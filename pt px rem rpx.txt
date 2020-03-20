@@ -1,0 +1,23 @@
+1.别叽霸扯没用的了  
+document.body.clientWidth = 375px
+所以iphone的屏幕宽度为375px
+
+rpx为1/2的px 所以375px = 750rpx
+微信ui图如果给的是375px的尺寸 那么布局的时候就X2 换成rpx单位
+
+2.rem布局/弹性布局
+首先让font-size = 62.5% 或者font-size = 10px
+此时1rem = 10px
+再将需要设置宽高的盒子全部以rem为单位布局 添加媒体查询
+
+3.响应式布局 
+1.设置好高 百分比设置宽
+2.<meta name="viewport" content="width=device-width, initial-scale=1.0">//自带 或则不设置
+这段代码的重点是 width=device-width，它将视口的宽度设置为设备的屏幕宽度，来让网页的宽度自动适应移动设备的屏幕宽度。
+而 initial-scale=1.0 表示页面按实际尺寸显示，不进行缩放。
+3.设置媒体查询
+@media screen and (max-width: xxxpx){
+设置小于480px后的样式
+
+}
+

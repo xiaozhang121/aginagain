@@ -1,0 +1,14 @@
+1.引用错误
+Uncauht(未捕获) Reference(引用)Error(错误): xxx is not defined(定义);
+常见出现场景:变量或函数名写错了
+
+2.类型错误
+Uncaught TypeError(类型错误):xxx is not a function/cannot read property(属性/方法) 'toString' of null
+常出现场景:对某个值的使用方式不符合类型本身的功能;(错误的获取了元素/错误的方法名...)
+
+3.语法错误
+Uncaught Syntax(语法)Error:Unexpected(不期待) token(标识符)')';
+Uncaught SyntaxError: missing ) after argument(实参) list(列表)
+常出现的场景:语法拼错了(括号太多/缺少括号);
+
+4.

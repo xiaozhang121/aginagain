@@ -1,0 +1,88 @@
+一
+ifconfig  查看本机IP地址
+whoami    查看登陆的用户
+su weblogic  切换到weblogic用户
+su root   切换到root用户
+exit 退出用户
+su - root  切换到root用户  切换的彻底一些
+su - weblogic  切换到weblogic用户  切换的彻底一些
+uname -a 查看操作系统信息  
+ll = ls -l 当前目录下面的所有文件（不包括隐藏文件）
+ls -la 当前目录下面的所有文件（包括隐藏文件）
+pwd  查看当前所在的路径
+ls -l
+cd / 切换到根目录
+hostname 查看主机名
+df -a 查看磁盘大小
+df -h 查看磁盘大小
+free -m 查看系统内存情况
+man ls --帮助命令（Q退出）
+
+二 系统网络信息
+ping 192.168.0.1 检测两台电脑是否连通
+yum install telnet 在联网的情况下添加telnet服务
+telnet 192.168.0.1 2131 检测端口是否连同
+netstat 查看网络状态
+netstat -anp
+clear 清屏（ctrl+L）
+service iptables status(防火墙状态)
+service iptables stop  关闭防火墙（临时）
+service iptables start 开启防火墙（临时）
+chkconfig iptables on  永久开启防火墙（重启系统后生效）
+chkconfig iptables off  永久关闭防火墙（重启系统后生效）
+reboot 重启linux系统
+vim /etc/sysconfig/selinux
+SELINUX=disabled
+（按del删除）
+vim 编辑命令，(i进去编辑状态  Esc退出编辑状态)
+无法输入wq时,先按冒号
+:q！不保存  wq保存
+cat 查看命令
+cat /etc/group 查看组
+cat /etc/passwd 查看用户
+groupadd -g weblogic 添加组
+useradd zhangsan 添加用户（不指定时会自动创建一个自己的组）
+passwd zhangsan 设置密码
+useradd -g gweblogic zhangsan 给用户分配组
+groupdel  删除组
+touch 创建文件
+mkdir music 创建目录
+mkdir -p music/123/123  创建多个文件
+cd ./../../.. 返回多个层级
+cd ..返回上一级
+chown zhangsan abd.txt --改变某个文件所在用户
+chgrp zhangsan abc.txt --改变某个文件所在组
+chown lisi:zhangsan music --改变目录的用户和组
+chown -R weblogic/gweblogic --改变目录里所有文件的用户和组
+cp 1.txt ./..复制文件
+cp -r music/2 /home/lisi 复制陌路
+mv 2 music/123 移动文件到某个目录
+rm -rf 1.txt 删除某个文件
+find -name 1.txt 查找文件
+r=4 w=2 x=1
+chmod 777 abc  改变读写操作权限
+cat 查看命令(比较少的)
+more 2.txt 查看大量文件(多的)
+tail -fn 700 2.txt  从尾部查看700行动态查看
+less (多的)
+四.打包与压缩
+gzio -r log.tar  压缩后变为log.tar.gz
+
+五.进程
+ps -ef 查看进程
+kill -9 14078 结束某个进程
+skill -kill -v pts/1 注销用户（1是用户号）
+
+
+
+D-目录
+r-read
+X-执行权限
+
+
+
+
+
+
+
+

@@ -1,0 +1,117 @@
+1.登录页:
+主要通过element组件库的form表单实现然后通过validate验证
+验证方式:给el-form添加rules属性,给el-form-item添加prop属性,prop属性就是被校验的属性名
+(表单无法验证布尔值方式,所以需要添加自定义校验)
+1.给自定义标签设置pro属性 :prop = xieyi
+2.在data中为xieyi声明方法:
+var xieyiText = function(rule,value,callback){
+value?callback():callback(new Error(请遵守协议))
+}
+3.通过validator使用该校验方法:
+loginFormRules:{
+xieyi:[{validator:xieyiTest}]
+}
+2.首页通过element组件库layout布局 再加div+css进行微调整
+一个echars表格
+第一个表格条形图加柱状图
+x轴为学科 y轴为班级数量 s轴为班级人数
+
+3.教学计划列表:
+通过e-card分为上下两个部分 上面部分是筛选条件  下面的部分是相关文章
+筛选部分:主要是radio,select标签和日历 el-date-picker
+el-data-picker绑定v-model属性 通过事件监听 可以监听到选取的开始和结束的日期装在一个数组中
+radio用于筛选学科 select用于筛选发布教师
+下部分通过el-table表格展示并添加分页功能
+通过size-change与current-change来处理每页显示多少条 与 当前页
+4.学生成绩:
+通过el-table标签展示 分别为学生名字 学校 分数 班级
+按分数从高倒低排序 通过后台获取到的数组 通过冒泡排序在serve反转数组之后渲染
+可以通过el-search搜索对应学生
+5.照片管理:
+主要为两个部分 
+一个部分为el-upload组件可实现图片上传
+另一个部分通过ul标签展示所有图片并且注册点击放大图片功能
+6.教学分享:
+使用form表单元素,包含标题,内容,封面图片上传并预览,发布并加入验证功能
+内容部分主要采用quil-edit富文本编辑器 下载之后直接标签引用
+封面上传并预览:通过upload的onchange方法,
+接收到event.raw参数为图片地址
+创建FileReader对象reader 通过reader的readAsDataURL(地址)方式转成base64码
+reader.onload等转换完成之后将图片地址等于reader.result即可
+
+
+封面上传预览原理:给radio标签注册value属性 0 1 2 3
+将value值存入data并将其当做数组长度 创建图片的div容器
+给div容器注册点击方法,当前的src为图片地址
+(实际原理 
+点击div容器 获取当前点击的下标 存入data中xu
+点击图片之后获取当前图片的src 将当前src存放在数组中对应xu) 这样第一个图片对应第一个容器
+第二个图片对应第二个
+
+
+
+
+
+
+通过评分来设置星级评价:
+由于星级组件是复用的组件所以需要根据不同的选择 设置不同的大小 所以就有了2x3x图
+1.
+格式
+<div class='star' :class='star-' + size>
+<span class='star-item' v-for='(sc,index) in startClasses' :class='sc' :key='index'></span>
+
+
+1.将2x 3x图分别放进不同的类名中 size跟标签中的size相对应 在不同的组件中设置不同的大小
+2.将所有的星星的类名放进一个数组
+startClasses是一个计算属性
+const CLASS_ON = 'on'
+const CLASS_HALF = 'half'
+const CLASS_OFF = 'off'
+computed:{
+startClasses(){
+const {score} = this; //获取当前评分 比如3.5
+const scs = []; //向scs中添加n个on 向scs中添加0/1个half 向scs中添加n个off 总个数为5
+//3.2: 3个整星 + 0个半星 +2个空星
+const scoreInteger = Math.floor(score) //向下取整 取到当前分数的整数部分 
+for (let i = 0;i<score.Integer;i++){
+scs.push(CLASS_ON) //向数组里面添加整星
+}
+//向src中添加0/1个半星
+if(score*10-scoreInteger*10>=5){ //如果实际分数减去整数部分的分数大于等于0.5
+scs.push(CLASS_HALF)  //那么向里面添加的半星数 比如3.5取整为3///3.5-3=0.5//那么就要添加半星
+}
+//向src中添加空格星
+while(scs.length<5){ //判断添加空星的个数
+scs.push(CLASS_HALF)
+}
+}
+return scs
+//3.5分的最终返还形式 [on,on,on,half,off]   class:on  class:on class:on class:half class:off      //on half  off 区别就是背景图不同
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

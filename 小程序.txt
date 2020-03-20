@@ -1,0 +1,80 @@
+1.wxss图片使用网络地址或者base64码 比如背景图
+64编码后图片体积比原始图片体积大 一般用于小图片 优点不用发网络请求
+字体图标必须为网络图标  并且为https
+
+2.改变data/v-model的功能
+handleTap(){
+this.setData({
+//数据的更新是同步的  页面更新是异步的
+this.data = this.data + 1
+},()=>{
+log(this.data)
+})
+}
+
+.bindTap  点击事件
+
+阻止时间冒泡.catchTap
+事件捕获:capture-bind:tap
+阻止捕获:capture-catch:tap
+处理事件对象
+
+e.target是tap点击事件触发的对象（也就是点击的是谁,追踪到源头)
+e.currentTarget是事件绑定在哪个元素上（也就是这个事件在哪个组件上,当前冒泡的组件）
+
+3.全局模块共享数据
+App({
+//定义在这里的属性和方法可以被全局访问
+name:'小明',
+age:18,
+sayHi:function(){
+xxx
+}
+})
+
+//getApp是小程序内置提供的函数,用于获取全局应用实例
+const app = getApp()
+Page({
+data:{
+name:'app.name'
+},
+onLoad:function(){
+app.sayHi()
+}
+})
+3.下拉刷新
+下拉刷新要调用接口 重新获取数据 渲染页面
+这样配置所有页面都支持下拉动作
+'window':{
+'navigationBarBackground':'xxx',
+'navigationBarTitleText':'猫眼电影',
+'backgroundColor':'f6f6f6',
+'enablePullDownRefresh':'true'
+}
+如果页面配置page.json name只有当前页面支持下拉动作
+{
+'enablePullDownRefresh':true,
+'backgroundTextStyle':'dark'
+}
+Page({
+//监听页面的下拉事件
+onPullDownRefresh:function(){
+log xx
+//这里可以调用后台接口
+}
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,211 @@
+1.回调地狱:
+异步任务中,下一级函数将上一级函数的返回值作为参数,使得函数形成层层嵌套的关系
+2.盒子垂直居中:
+position:absolute   top50% left50% translate -50% -50%
+3.拖拽:
+offsetXTop/Left 是元素相对于父节点上左的距离
+screenX/Y是鼠标相对于当前屏幕左上角x,y的坐标
+
+
+
+4.定时器:settimeout setinval 异步
+5.web存储 cookie大小4k只能在规定时间内有效  浏览器存储为20m local为除非清除否则一直有效 
+ses关闭浏览器后失效
+6.innerHtml 动态创建dom元素
+7.状态码 200成功 400客户端错误代码错误/请求参数错误 301跳转 403服务器拒绝 404没找到 500服务端错误
+8.XML,JSON 
+9.消除浮动:
+1.给父盒子加overflow hidden
+2.在父盒子后边加空标签 clear:both
+3.双伪元素
+.clearfix:before,.clearfixafter{
+content:''
+clear:both
+display:block
+height:0
+visible:0
+}
+10.前端网络性能优化:
+1.减少http请求 使用雪碧图
+2.使用cdn网络 
+3.css少使用表达式
+4.样式写在样式表前面 js写在后面
+5.使用图片懒加载机制
+11.响应式原理:
+通过网格系统布局 通过媒体查询
+12.事件冒泡 阻止冒泡:
+事件冒泡:点击子元素 如果父元素上面也注册了点击事件 那么子元素会使父元素也触发点击事件
+解决:return false stoppropgation
+13.闭包:
+内部函数可以访问其外部函数中声明的参数和变量
+使用场景:定时器
+14.for in  for of  for each
+for each 遍历数组 不能中断循环
+for in 遍历得到的是属性名 obj[0]才是值 用来遍历对象
+for of es6新语法 可以遍历数组不能遍历一个普通对象 但是可以遍历一个不可枚举的对象(通过object.keys())
+
+15.set和map的区别:
+set结构类似数组但是成员是不重复的值 并且需要array.form转换
+map结构是键值对集合结构 map.has()判断有无属性 map.get()获取该属性的值
+
+16.http和https区别
+端口不同http是403 https是800
+http可见 https不可见更加安全
+17.声明周期:
+created:before:没有dom没有data/有data没有dom 修改data数据在此执行
+mouted:有datadom没有渲染/有data dom渲染完毕
+updated:
+destroyed:
+18.mvvm和mvc区别:
+mvvm双向数据绑定 m(data数据)  v(界面) vm(监听)
+mvc(dat数据) v(界面) c()
+19.vue核心特性:v-model 双向数据绑定
+20.组件传值
+vuex
+父子传值
+父传子:
+子prop接收
+子传父:
+子使用 $emit('函数名',值)发送
+父@函数名='方法'
+方法(val){
+val就是值
+}
+21.
+路由跳转:
+route与router的区别
+router是路由的实例对象 可以直接通过push跳转
+route是路由的信息对象 可以通过paramas查看路由信息
+22.权限管理:
+设置两个路由表
+一个为公共样式了404/login 另一个通过meta添加属性 
+登录后通过meta属性的信息动态添加路由addRoutes 使得有两个路由分支 
+
+
+1.js数据类型,
+基本数据类型:number,string,boolean,null,unfined
+引用数据类型:Object array function
+2.面向对象 面向过程
+面向过程是分析出解决问题的步骤 然后使用函数将这些步骤一步一步实现在依次调用
+面向对象是将问题分成了多个对象 然后再绑定这个对象在该问题中的行为
+3.在前端中DOM节点不需要显示
+4.DOM节点绑定有哪些方法
+id/tagsname/class/nth
+5.http请求 服务器主动推送消息的:websocket
+6.webwork
+7.存储数据
+localStorage.setItem
+vuex
+8.跨域
+josnp(只能发送get)
+cors (原生需要new XMLhttpRequest在配置请求头   vue config里面配置代理)
+代理
+9.vue声明周期
+10.组件传值
+11.vue-router两个页面怎么传值?
+$router.push({
+params:xx}
+)
+this.$route.params.xxx
+12.vue中data为什么是方法不是对象
+如果两个实例同时引用一个对象 那么当一个实例属性改变另一个也跟着改变
+只有当实例都有自己的作用域的时候才不会干扰
+
+13.vue组件传值中怎么使css在当前组件生效 style中加一个scope
+14.vue中常用的指令:
+v-if v-show
+v-model
+v-on
+v-for
+15.vue中常用的修饰符:
+.nubber 转换数字/.trim去除空格/.native给父组件绑定元素事件(将子变为普通html标签)
+
+16.前端优化:
+1.压缩css js代码
+2.
+17.js垃圾回收机制:
+js的垃圾机制就是当代码执行完毕后或则没有对它的引用就会被回收处理掉;
+内存泄露:
+不再用到的内存没有及时释放既不能使用也不能回收
+1全局变量引起的内存泄露
+2闭包引起的内存泄露
+
+1.HMTL5 History模式:
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

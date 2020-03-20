@@ -1,0 +1,36 @@
+1.ajax的实现原理:
+通过XmlHttpRequest对象向服务器发送异步请求,从服务器获取数据然后用js来操作DOM更新页面
+1.创建XMLHttpRequest对象 var xmlHttp = new XMLHttpRequest
+2.建立连接:设置为GET发送: xmlHttp.open('GET','url地址',true异步)
+3.发送数据:xmlHTTP.send();
+4.注册回调方法:xmlHttp.onreadystatechange = ajaxCallback;
+5.执行回调:
+function ajaxCallback(){
+if(xmlHttp.readySate===4&&xmlHttp.status===200){
+	 = xmlHttp.reponseText;
+}
+}
+
+
+2.jsonp实现原理
+ajax有同源策略 scirpt标签没有 所以可以通过src的地址请求
+//得到信息查询后的回调函数:
+var flight = function(data){
+alert(data.price)
+}
+
+//1.提供jsonp的地址
+var url = 'xxxxx'
+2.创建script标签 设置属性
+var script  = document.creatElement('script');
+script.setAttribute('src',url);
+3.把script标签加入head,从此调用开始
+document.getElementByTagName('head')[0].appendChild(script)
+
+3.vuex原理
+通过vue的混入机制将store注入到vue组件实例组件的data中,响应式是借助data的响应式
+,getters则是借助vue的计算属性computed实现数据实时监听;
+首先组件会触发actions事件,但是actions事件内部实则是mutations函数,然后通过mutation改变state的值,state再重新
+渲染到页面上
+4.promise原理
+5.响应式原理

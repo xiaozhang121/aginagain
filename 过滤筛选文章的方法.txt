@@ -1,0 +1,64 @@
+1.手机端 从全部频道数据中过滤掉我的频道
+computed:{
+channelRest:function(){
+//
+let user =this.channel.map(item=>{
+return item.id
+})
+}
+}
+.map()方法返回一个经函数处理之后的数组可在()里添加逻辑/返回一个item.id的数组
+.filter()返回一个新的数组,新数组中的元素是通过检查所有指定数组中符合条件的所有元素
+.includes()判断数组数组是否包含一个元素 有返回true 否则false
+
+let rest = this.channelAll.filter(item=>{
+//包含的取反 返回false filter再将其过滤掉
+return !user.includes(item.id)
+}
+)
+
+2.搜索文章/自定义本地
+ var sea = this.searchArt;
+ var products = result.data.data.results;
+ var arr = [];
+//遍历过滤得到的数组信息
+products.filter(function(product) {
+//输入的题目
+let sear = { title: sea };
+//将包含相同字段的装进数组
+return Object.keys(sear).every(function(key) {
+            if (product[key].indexOf(sea) > -1) {
+              arr.push(product);
+              console.log(arr);
+
+              bu.$emit("ser", arr);
+            }
+          });
+        });
+
+
+
+
+.map() 通过指定函数处理数组的每一个元素,并返回处理后的数组(map不会改变原数组,不会检查空数组)
+.some()用于检测数组中的元素是否满足指定条件(返回值为布尔值,剩余元素不会再检测,有一个元素满足则返回true)
+.every()用于检测数组所有元素是否都符合指定条件(返回值为布尔值,如果有一个不满足则整个表达式返回false,剩余的不进行检测)
+.filter()创建一个新数组,新数组中的元素是否通过检查指定数组中符合条件的所有元素(会根据函数的筛选条件的结果返回一个新的数组)
+Object.keys()要返回其枚举自身属性的对象,返回一个所有元素为字符串的数组
+.indexOf()如果满足则返回搜索的字符在总体的位置,没有则返回-1
+.findIndex()相当于遍历对象/默认遍历集合将集合中每一个元素传入到item中
+//获取满足条件的下标
+var index = this.list.findIndex(item=>{})
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,338 @@
+1.监听页面滚动
+onPageScroll(e){
+this.scrollTop = e.scrollTop
+}
+滑动到底部 向上的图标显示原理:
+通过监听当前的滚动距离 通过v-if 如果大于某个设定值 之后显示
+注册点击事件
+控制页面回到顶部 自带功能 两个擦书 第一个参数为滚到的距离 第二个参数为动画延迟
+uni.pageScrollTo({
+scrollTop:0
+})
+2.点击搜索框后的固定屏幕高度
+如果不固定 点击搜索之后背景为白 但是仍然可以下拉显示其他商品
+首先给搜索框注册鼠标focus事件,
+@focus = onSearch
+
+search(){
+const {windowHeight} = uni.getSystemInfoSync();获取屏幕可视区域的大小 系统自带
+this.$emit('window-height',windowHeight};将可视区域大小传递给父组件;
+}
+
+<view :style='{height:pageHeight,overflow:hidden}'>
+<search @window-height = 'handleWindowHeight'>
+
+handleWindowHeight(val){
+//传过来的是一个number类型的高度 赋值给data 并渲染
+this.pageHeight = val + 'px'
+}
+
+@input 当键盘输入时 触发input事件 
+@focus 当输入框聚焦时触发
+@blur 输入框失去焦点时触发
+@confirm 点击完成按钮时触发
+
+3.搜索防抖 设置计时器
+@input = handleQuery
+
+handleQuery(){
+通过函数防抖的方式限制接口调用的频率
+clearTimeout(this.timer)
+this.timer = setTimeout(async ()=>{
+const {message} = await this.$request({
+path:''xxxxxxxxxxxxxxxxxx
+})
+this.qlist = message
+},100);
+}
+
+4.搜索 监听回车事件
+
+data(){
+return {
+//缓存关键字 先查询之前的搜索历史 如果没有则默认为空数组
+history:uni.getStorageSync('history')||[ ]
+}
+}
+
+
+
+handleEnter(e){
+//动态获取输入框的最新值
+let v = e.detail.value;
+this.history.unshift(v)
+//将输入框的输入的值去重并放入数组
+let arr = [...new Set(this.history)]
+更新状态
+this.history = arr
+//把当前的历史关键字进行缓存
+uni.setStorageSync('history',arr)
+//回车时跳转到商品列表页面
+uni.navigateTo({
+url:'xxxxxxxx' + v
+}
+)
+}
+
+<scroll-view scroll-y>可滚动的视图区域(可沿着y滚动 )
+
+
+分类栏:
+点击左侧分类 可得到右侧的2级分类 与 三级分类
+得到的后台数据为三维数组
+首先先将一维数组通过遍历 得到左侧的分类栏
+<scroll-view scroll-y @click='handleChange'>
+<v-text v-for='item in categories'>
+然后给标签注册点击事件 通过此点击得到当前是属于哪个一维数组 并得到其所有的二级三级数组
+handleChange(e){
+this.currentId = e.target.dataset.id
+}
+通过计算属性+filter筛选
+computed:{
+rightData(){
+const data = this.categories.filter(item=>{
+return item.cat_id ===this.currentid //此时返回的是当前所遍历的一维数组
+return data[0]?data[0].children:[]//此时得到了所属的二维数组
+})
+}
+}
+
+然后右侧标签再继续遍历此二维数组
+<view v-for='item in rightData'>
+<view v-for='item in item.children'>//遍历三维数组
+
+5.分页原理
+@scrolltolower='xxx'  //滑到底部时触发
+
+写一个请求列表函数 在onload时触发
+async loadData(kw){
+if(this.loaded){
+//如果接口尚未返回数据就阻止后续的请求
+return
+}
+this.loaded = true
+const {message} = await this.$request({
+path:'xxx',
+params:{
+pagenum:this.pagenum,//当前页
+pagesize:this.pagesize,//每页显示数目
+query:kw
+}
+})
+//对于分页来说应该做累加操作
+this.goods=[...this.goods,...messaeg.goods]
+this.total=message.total
+//返回接口数据后允许在此次发送请求
+this.loaded = false
+const {message} = await this.$request({
+path:'xxx',
+param:{
+pagenum:this.pagenum,
+pagesize:this.pagesize,
+query:kw
+}
+})
+//对分页来说应该做累加操作
+this.goods=[...this.goods,...message.goods]
+this.total = message.total
+//接口返回数据后 允许再次发送请求数据
+this.loaded = false
+}
+
+当滑到底部时刷新数据
+reachBottom(){
+if(this.goods.length>=this.total){
+uni.showToast({
+title:'没有更多数据了'
+})
+return
+}
+//加载下一页数据
+this.pagenum = this.pagenum+1
+//页码加载后再次调用后台接口
+this.loadData(this.kw) //因为已将data中的数据更改完毕 所以不需要传入page 直接传入keywords即可
+}
+
+
+5.获取商品详情页:
+首先通过搜索之后传过来的id得到当前详情的id 并将此作为参数发送请求
+onLoad(param){
+this.id = param.id
+this.loadData(param.id) //将当前id作为id传入获取当前详情页
+}
+
+async loadData(id){
+const {message} = await this.$request({
+path:'goods/detail',
+param:{
+goods_id:id
+}
+})
+this.goods = message
+}
+
+6.加入购物车
+data(){
+return(){
+id:''//当前商品id
+goods:null//当前商品所有信息通过param获得
+cart: uni.getStorageSync('mycart') || [] //如果有本地存储则使用存储 没有则为空
+}
+}
+
+
+addCart(){
+//按照没有登陆的流程实现
+//记录当前所购买的商品的信息
+let product = {
+goods_id = this.goods.goods_id,
+xxxxx = xxxx
+}
+//加入之前先判断该商品在不在购物车里 .map返回值是一个布尔值
+let isExist = this.cart.some(item=>{
+return item.goods_id ===this.goods.goods_id
+})
+if(isExist){ //通过上面返回的布尔值进行判断 如果存在
+this.iscart.some(item=>{
+if(item.goods_id===this.goods.goods_id){
+//如果存在 则累加该商品数量
+item.goods_num +=1
+}
+})
+}else{
+//首次添加商品
+this.cart.push(product)
+}
+//将购物车数据进行缓存
+uni.setStorageSync('mycart',this.cart)
+//加入成功后提示
+uni.showToast({
+title:'加入购物车成功'
+})
+}
+
+goCart(){
+//先加入购物车然后进购物车界面
+
+uni.switchTab({
+url:'page/cart/index'
+})
+}
+
+
+createOder(){
+//先加入购物车然后到购物侧页面
+this.addCart()
+uni.switchTab({
+url:'xxx'
+})
+}
+
+7.立即购买
+之前将添加购物车的商品已经存放在了本地 立即购买直接从本地获取数据即可之后通过遍历就可以将商品展示出来
+点击按钮增加数量
+changeNum(index,n){
+//商品数量最小为1   this.cart[index].goods_num为当前框里面显示的数字 如果当前数字小于等于1则不执行
+if(n===-1&&this.cart[index].goods_num<=1){
+return
+}
+//商品数量不能多于库存//库存可通过后台数据获取 这里假的
+if(n===-1&&this.cart[index].goods_num>5){
+return
+}
+this.cart[index].goods_num +=n //因为标签内传入两个参数(index,1) (index,-1) 所以单击的同时可以实现加减功能
+}
+
+8.checkedProducts(){(计算属性)
+//过滤出所有选中的商品
+return this.cart.filter(item => item.goods_check===true)
+}
+
+
+9.全选与反选(计算属性)
+isAll(){
+//如果选中的商品等于购物车内的商品则返回true
+return this.checkedProducts.length ===this.cart.length
+}
+
+
+toggleAll(){
+//控制所有商品的选中与反选
+let flag = !this.isAll  //如果没全选中 那么isAll就为false 那么取反就是true相当于全选中
+//如果全选中 那么取反就是全没选中
+this.cart.forEach(item=>{
+item.goods_check = flag
+})
+}
+
+10.计算总价钱(计算属性)
+countTotal(){
+let total = 0;
+this.checkProducts.forEach(item=>{
+if(item.goods_check){//只累加选中的
+total += item.goods_price * item.goods_num //累加 
+}
+})
+}
+
+11.选择收获地址
+uni.chooseAddress({
+success:(res)=>{
+this.address = res
+}
+})
+
+
+12.创建订单
+createOrder(){
+if(this.checkedProducts.length===0){
+uni.showToast({
+title:'请选择商品'
+})
+return
+}
+//判断是否选中了收获地址
+if(this.address===null){
+uni.showToast({
+title:'请选择地址'
+})
+return
+}
+//判断是否登录
+const token = uni.getStorageSync('mytoken')
+if(!token){
+uni.navigateTo({
+//如果没有登录则跳到登录界面进行登录
+uni:'xxx'
+})
+}
+4.下单
+}
+
+初始化数据 每次显示都是要重新获取缓存最新数据
+onShow(){
+this.cart = uni.getStorageSync('mycart') || []
+}
+
+
+ 
+
+点击搜索框出现遮罩的原理
+首先点击事件@focus uni.getSystemInfoSync()可获得可视区域的大小
+将可视区域的大小传递给主页 可实现点击搜索后列表不下拉
+通过搜索/取消 设置isFocused布尔值来判断遮罩是否显示
+遮罩的高度通过absolute来设置 top:94px left 0 right 0 bottom 0
+
+平时search显示 遮罩不显示怎么实现的?
+给组件父标签设置一个判断类名 如果点击搜索框 则类名生效 如果不点击则不生效
+该判断类名设置搜索列表模式的显示或隐藏
+@.focused 
+.conten{display:block}
+当点击后 此类名生效 display blick才生效 否则为inline 所以搜索可以一种出现 历史则隐藏
+
+
+
+
+
+
+

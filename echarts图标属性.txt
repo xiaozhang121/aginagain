@@ -1,0 +1,55 @@
+1.tooltip提示框组件:
+*show是否显示提示框组件,包括提示框浮层和axisPointer(轴指针)
+*trigger(触发):item:散点图,饼状图使用/axis:坐标轴触发,折线图柱状图使用/none:不触发
+*axisPointer(轴指针):{
+type:'cross' //指标线形状
+corssStyle:{
+color:'#999' //指标颜色
+}
+}
+2.toolbox(工具箱): //数据形状切换工具
+*feature:{
+dataView:数据视图工具,可以展现当前图标所用的数据//右上角选项单机可切换
+magicType:动态类型切换//可切换成数据列表 条形图 柱形图
+restore:配置项还原
+saveAsImage:图形阴影模糊的大小
+}
+3.legend图例组件:
+*data图例的数据数组--就是鼠标放在上面出现的框里的文字
+4.xAxis坐标x轴:
+[
+*type:坐标轴类型
+*data:x轴坐标数据
+*axisPointer:x轴指示器配置项//就是对照x轴的一条直线
+]
+5.yAxis坐标y轴:
+name:名字
+min:起始值 //设为dataMin即为获取到最小值
+max:最大值 //设为dataMax即为获取到的最大值
+interval:y'轴间隔值
+axisLabel:{
+formatter:刻度标签内容使用模板字符串
+}
+
+
+
+
+
+
+总体:
+xAxis/yAxis:设置坐标轴
+yAxis:设置坐标轴的最小值最大值
+series:增加图形 或者设置参数在这里面设置
+
+
+
+
+
+
+
+
+
+
+
+
+

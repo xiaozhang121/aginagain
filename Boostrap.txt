@@ -1,0 +1,27 @@
+1.class属性
+display-1/2/3/4字体大小
+bg-light 背景亮色
+bg-info暗色
+text-left/right文字居左/右
+text-lowercase改小写
+text-uppercase大写
+text-capitalize首字母大写
+w-25%宽整体的25% h-50高整体的50%
+
+col-xl-12    大屏12
+col-md-6 	 中评6
+col-sm-4	 小屏4
+col-6	
+
+中屏时两行排列
+  <div class="row">
+        <div class="mycontainer col-xl-12 col-md-6 col-6">
+            <div class="bg-primary w-25 h-50"></div>
+        </div>
+        <div class="mycontainer col-xl-12 col-md-6 col-6">
+            <div class="bg-primary w-25 h-50"></div>
+        </div>
+    </div>
+
+
+order-md-2   order-md-1 先显示哪个

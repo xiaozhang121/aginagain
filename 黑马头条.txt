@@ -1,0 +1,1637 @@
+
+*******************************************************登录页******************************************************
+1.创建login组件和路由:
+{path:'/login',name='login',component:()=>import('@/views/login')}
+更改vue.config.js
+module.exports = {
+  lintOnSave: false, // 是否开启Eslint
+  devServer: {
+    open: true, // 是否打开浏览器
+    port: 19922// 端口号
+  }
+}
+
+
+2.给login组件绘制盒子:
+创建src/assets/css/global.css文件/让其高度占满整个屏幕,并消除默认padding,margin
+
+3.在main.js中引入global.css文件
+import '@/assets/css/global.css'
+在babel.config中配置
+module.exports = {
+  plugins: [
+    [
+      'component',
+      {
+        'libraryName': 'element-ui',
+        'styleLibraryName': 'theme-chalk'
+      }
+    ]
+  ]
+}
+
+
+4.在index.vue中 通过实现盒子效果
+
+5.安装ElementUI组件库:npm add element-ui/npm add babel-plugin-component -D
+
+6.安装elementui组件库,css样式按需引入,组件/事件方法完全引入/设置plugins段
+
+7.在main.js中引入,注册组件库模块
+import ElementUI from 'element-ui'/Vue.use(ElementUI)
+
+8.引入form表单
+
+<el-from ref='*form*' :model='*form*' label-width>:
+ref:获取当前的组件对象/方便后期通过vue的方式获取当前的组件  
+this.$refs.form表单校验 
+:model='from' 属性绑定model 与v-model无关 作用格式收集表单的全部数据 表单校验使用
+label-width:设置表单域项目名字区域宽度
+
+<el-form-item label='活动名称'>
+每个表单域项目的单元组成 label设置当前表单项目的名字
+
+<el-input v-model='*form.name*'>
+v-model:双向绑定 具体绑到form对象的name成员里边 
+
+vue获取dom对象的方式 this.#ref.xx
+ref/model/v-model是必须的  label-width/label是非必须的
+
+案例:
+<el-form ref="loginFormRef" :model="**loginForm**">
+<el-form-item>
+<el-input v-model="**loginForm.mobile**" placeholder="请输入手机号码"></el-input>
+</el-form-item>
+<el-form-item>
+:model给父元素绑定属性 子元素通过v-model='父.属性值'获取
+data(){
+reurn{
+*loginForm*:{
+mobile:'',
+}
+}
+}
+elementui每个组件都需要被编译为具体的html标签代码 html标签同时生成class属性 属性值就会包含当前
+组件标签的名字 因此可以通过组件名称以class的方式进行css样式控制;
+<el-form>--------编译 <div class='el-form'>
+<el-form-item>--编译<div class='el-form-item'>
+
+9.表单校验(自然方式)
+1.给el-form设置:rules属性
+<el-form ref="loginFormRef" :model="**loginForm**" :rules='loginFormRules'>
+2.给各个被校验的项目的el-from-item组件设置prop属性 属性值就是表单对象的成员名称
+<el-form-item prop='mobile'>
+<el-from-item prop='pattern'>
+3.在data中定义具体的校验规则
+data(){
+return {
+loginFormRules:{
+mobile:[
+{required:true,message:'手机号必填'},
+{pattern:/^1[35789]\d{9}$/, message: '手机号码格式不对'}
+],
+code:[{required:true,message:'验证码必填'}]
+}
+}
+}
+********ref  :model   :rules都在<el-form中设置>
+
+10.表单校验(自定义-协议)
+1.设置prop
+<el-form-item prop='xieyi'>
+2.声明校验的function方法 在data中为xieyi声明方法
+var xieyiTest = function(rule,value,callback){
+//rule:校验规则 一般不用  //value当前被校验的信息  //callback回调函数 成功失败都执行
+value?callback():callback(new Error('请遵守'))
+}
+3.通过validator使用该校验方法:
+loginFormRules:{
+xieyi:[
+{validator:xieyiTest}
+]
+}
+required不能校验true/false的信息 所以需要自定义
+校验协议信息的xieyiTest需要定义到data的方法中不是return内部
+校验规则要使用validator关联xieyiTest函数
+
+this.$refs.loginFormRef.validate(校验) 表单验证 是VueComponent的$ref中的loginFormRef中validate的一个方法
+表单填写完整valid为true;
+this.$router是一个全局路由对象，是VueRouter的实例 后边接push,go等实现页面跳转;
+this.$message常用语主动操作后的反馈提示
+this.$message:{
+message:'恭喜',
+type:'success'
+error('xxx')
+}
+
+11.客户端记录账号信息
+发送axios请求,接收到result数据后,
+if(result.data.message==='OK'){
+window.sessionStorage.setItem('userinfo',JSON.stringify(result.data.data))
+this.$router,push('/home')
+}
+
+12.非登录用户限制访问
+router.beforeEach((to,from,next)=>{
+//to是一个对象 to.path是当前页的索引
+if(!userinfo&&to.path!=='/login'){
+return next('/login')
+}
+next()
+})
+
+13.人机交互验证
+1.将gt.js放到src/assets/js目录下
+2.将git中不规范代码更改,函数传递参数不能直接传递布尔值,相反可以声明变量传递/要通过===方式判断是否
+相等/不能设置空的回调函数实参,没有意义
+
+开发人机交互验证步骤:
+1.axios向本身后端服务发起请求,后盾服务器会返回极验请求的秘钥信息
+2.极验密匙信息+用户行为一并提交给极验服务器做判断,查验行为是否正确
+
+aixos默认为res.data
+解构赋值:
+let { data } = result.data
+//如果用data接收的话
+需要 let data = result.data.data
+
+gt: data.gt,
+challenge: data.challenge,
+offline: !data.success,
+new_captcha: true,
+product: 'bind' 
+
+
+this.$router
+this.$refs
+this.$message
+
+14.按钮添加等待禁用
+:isLoading='isActive';
+:disabled:='isActive';
+
+15.处理重复创建DOM的问题:
+创建data成员
+capObj:null/
+
+.onReady(()=>{
+captchaObj.verify()
+this.isLoading = false
+this.capObj = captchaObj//接收极验对象 
+})
+if(this.capObj){return this.capObj.verify()} //如果有 直接调用
+
+16.引入icofont图标 import '@/assets/font/iconfont.css'
+<i slot='prefix' calss='iconfont icon-iconfontshouji'>
+
+*******************************************************首页******************************************************
++++++++++++++++++++++++++++头部
+1.绘制后台品字页面结构(饿了么组件库)
+<el-container->
+<el-side/el-header/el-main>
+
+2.头部制作
+(下拉菜单)
+<el-dropdown-menu slot='dropdown'><el-drop-menu>
+<el-dropdown-item></el-dropdown-item>
+
+3.从本地登录存储中获取头像和名称
+计算属性/JSON.parse(window.sessionStorage.getItem('userinfo'))
+
+++++++++++++++++++++++++++左侧导航栏
+4.粘贴组件结构
+<el-menu
+background-color//菜单背景颜色
+text-color//菜单文字颜色
+active-text-color//子菜单选中后的颜色
+>
+el-menu-item 叶子菜单(没有子菜单)：index
+el-submenu(拥有子菜单元素)：index
+index: 用以区分彼此、配置路由地址
+
+(一些导航略小,将宽度统一设置一个宽度)
+
+5.折叠展开效果
+(如果需要放置左侧顶部图片 需要在el-menu外边包一个el-con 然后再el-con下一下放置标签)
+1.给el-menu设置相关属性:
+:collapse:'isCollapse' //控制折叠展开
+:collapse-transition='false' //禁止折叠动画
+2.创建data成员:
+isCollapse:false   //false展开 true折叠//默认展开
+3.给标签图标注册click事件
+<i
+:class='isClooapse?'el-icon-s-infold:'el-icon-s-fold'//判断展开折叠 改变图标样式
+@click='isCollapse=!isCollapse'//点击切换
+>
+4.所有的菜单宽度自适应
+:style="{width:isCollapse?'65px':200px'}"
+
+6.退出系统
+给退出按钮设置单机事件
+<el-dropdown-item @click.native='logout()'>退出</el-dropdown-item>
+logout(){
+this.$confirm('确认要退出吗?','退出',{
+confirmButtonText:'确定',
+cancelButtonText:'取消',
+type:'warning'
+}).then(()=>{
+window.sessionStorage.clear()
+this.$router.push('/home')
+}).catch(()=>{})
+}
+
+@click是vue事件绑定,具体是给普通的html标签使用/组件对象是多个html标签的集合体 集合绑定事件不知道具体对哪个标签使用因此余姚使用native的修饰符
+
++++++++++++++++++++++++++++++右侧导航栏
+7.
+App.vue是根基主见/home是中间组件/welcome,article,account是最内部组件
+因此需要在home的中进行子路由配置
+{path:'/home',
+name:'home',
+component:Hom,
+redirect:'/welcome',//重定向
+children:[
+{path:'/welcome',name:'welcome',component:Wel},
+{path:'/article',name:'article',component:Art},
+]
+}
+在home/index.vue中设置占位符<router-view>
+
+8.
+给左侧导航设置路由 <el-menu router>//类似router-link
+给具体的菜单选项的index配置导航锚点 <el-menu-item index='/article'>文章列表
+
+9.搜索区域 卡片去和空表单
+el-card可以创建一个白底的卡片区域
+
+10.创建状表单域
+<el-form-item label='文字状态'>
+<el-radio v-model='searchForm.status' label>全部</el-radio>//el-radio单选框组件
+<el-radio v-model='searchForm.status' label='0'>草稿</el-radio>//label用于获取当前单选按钮的value值情况
+data成员:
+return{
+searchForm{
+status:'0'  //需要转为字符串 若直接写数字则需将行内的label变为:label(用于接收变量或者表达式)
+}
+}
+
+10.频道表单域(下拉列表)
+<el-form-item label='频道列表'>
+<el-select v-model='searchForm.channel_id' clearable>
+<el-option label='h5' value='101'> //el-select/el-option下拉组件 label设置每个项目对外显示的名字 value为上传上去的数据
+data成员:
+return {
+searchForm:{
+channel_id:'',//频道id
+status:'0'
+}
+}
+
+11.事件表单域
+<el-form-item label='事件选择'>
+<el-data-picker
+v-model='timetotime'
+type='daterange'
+range-separator='至'//中间的汉字
+start-placeholder='开始日期'
+end-placeholder='结束日期'
+value-format='yyyy-MM-dd'//日期格式
+>
+type='daterange' 类型设置 daterange表示是日期范围选取的还有其他可选
+year/month.data.....monthrange
+el-data-picker日历组件 接收的是一个数组信息 里边第1,2单元分别代表开始日期和结束日期,最后要将其分配给searchForm 的两个成员(begin_pubdate和end_pubdate中才能在界面中显示)
+data成员:
+timetotime:[]
+
+12.设置监听器
+watch:{
+  // data成员名称:函数(新值，旧值){}
+  name:function(newv,oldv){},
+  addr:function(newv,oldv){},
+  'cat.leg':function(newv,oldv){},  // 对象成员监听
+  'cat.tail':function(newv,oldv){},
+  cat: { // 深度监听，内部任意成员变化都会感知到
+    handler: function (newv, oldv) { /* ... */ },
+    deep: true
+  },
+}
+
+利用监听器将接收到的日期数组信息拆分到data成员中
+timetotime=[]写在date成员中;
+watch写在export defaults中
+
+watch:{
+
+timetotime:function(newV){
+if(newV){
+this.searchForm.begin_pubdate= newV[0]
+this.searchForm.end_pubdate=newV[1]
+}else{
+xxx='';
+xxx='';//清空
+}
+}
+}
+
+13.阿贾克斯获取频道数据展示
+1.data创建channelList
+channelList=[];
+2.
+methods:{
+getChannelList(){
+let pro = this.$http({
+	url'/channels',
+	method:'get'
+})
+pro.then(result=>{
+//data成员接收获取到的信息
+this.channelList = result.data.data.channels
+})
+}
+}
+3.在create中调用方法
+created(){
+this.getChannelLsit()
+}
+4.在模板中显示
+<el-from-item label='频道列表:'>
+<el-select v-model='searchForm.channer_id'>
+<el-option
+v-for='item in channelList'//channelLsit中有获取到的全部信息
+:key = 'item.id'
+:label = 'item.name'
+:value='item.id'
+>
+
+14.文章列表展示
+发送请求时需要携带token数据
+在main.js的请求拦截器中配置token
+axios.interceptors.request.use(function(config){
+let userinfo = window.sessionStorage.getItem('userinfo')
+if(userinfo){
+let token = JSON.parse(userinfo).token
+//在请求头中配置token
+config.headers.Authorization = 'Bearer' + token
+}
+return config
+}
+})
+(token没有配置好会出现401)
+
+15.aixos独立
+创建src/until/ax.js将axios相关分隔/导入
+
+16.获取文章列表信息
+1.创建data成员:
+articleList:[]/tot:0
+2.在methods创建getArticleList()方法 axios请求列表
+getArticleLsit(){
+let pro = this.$http({
+url:'xxx',
+method:'get'
+})
+pro .then(result=>{
+this.articleList = result.data.data.results
+this.tot = result.data.data.total_count
+})
+}
+3.在createrd中调用
+
+17.创建文章展示列表table表格
+<el-card>
+<div slot='header' calss='clearfix'>
+<span>{{tot}}
+<el-table :data='articleList'>
+<el-table-column prop='title' label='标题'>
+操作按钮
+<el-table-column label='操作'>
+<el-button type='primary' size='mini' icon='el-icon-edit'>修改
+
+18.prop不能传递标签所以图片需要利用插槽
+<el-table-clumn label='图标'>
+<img 
+:src='stData.row.cover.images[0]'
+slot-scope='stData'
+>
+模拟el-table-column组件内容
+<template>
+<div>
+<slot row='包含了每个文章的记录信息'>6
+
+19.状态列:
+<el-table-column prop='status' label='状态'>
+<template slot-scope>
+<el-tag v-fi='stData.row.status===1' type='success'>待审核
+多个el-tag组件标签都要使用数据部分 可以使用一个公共的父级template标签同意使用
+
+20.分页效果
+分页组件:
+<el-pagination
+ @size-change="handleSizeChange" //每页显示跳出变化的处理事件 需要methods方法配合
+      @current-change="handleCurrentChange"//当前页码变化的回调处理事件 需要mthods
+      :current-page="currentPage4" //默认当前页码1
+      :page-sizes="[100, 200, 300, 400]" //下拉列表 设计每页显示条数
+      :page-size="100" //默认每页显示条数
+      layout="total, sizes, prev, pager, next, jumper" //分页元素构成设计
+      :total="400"> //记录总条数
+>
+步骤
+1.在data中补充分页条件
+searchForm:{
+page:1,//当前数据记录页码
+per_page:10,//分页数据记录条数(10-50)
+}
+2.配置getArticleList方法
+getArticleList(){
+let searchData = {}
+for (var i in this.searchForm){
+if(this.searchForm[i] || this.searchForm[i]===0){
+searchData[i] = this.searchForm[i]
+}
+}
+let pro = this.$http({
+url:'xxx'.
+method:'get',
+params:'searchData'
+})
+pro.then(result=>{
+//接收搜文章数据
+this.artileList = result.data.data.results
+//接收文章总条数
+this.tot = result.data.data.total_count
+})
+}
+3.页码和每页条数变化处理更新
+handleSizeChange(val){
+this.searchFomr.per_page = val
+}
+handlCurrentChange(val){
+this.searchForm.page = val
+}
+4.筛选过滤
+watch:{
+searchForm:{
+//深度监听 如果有数据变化那么就调用函数
+handle:function(newV,oldV){
+this.getArticleList()
+},
+deep:true;
+}
+}
+(筛选过滤)
+给每组分标签上加个父标签el-xx-group
+<el-radio-group v-model = 'searchForm.status' @change='getArticleList()>
+<el-radio label>全部</el-radio>
+<el-radio label="0">草稿</el-radio>
+group可以统一给多个radio单选按钮设置change事件 
+watch:{
+'searchForm.status':function(newV,oldV){
+this.getArticleList()
+}
+}
+
+
+21.错误状态码401:
+1.需要传递token码而实际没有传递2.token在服务器存储的时间为两个小时 时间过期
+设置响应拦截器:
+axios.interceptors.response.use(funtion(response)[
+//正常处理
+return response
+),function(error){
+//非正常处理
+if(error.response.status===401){
+router.push('/login')
+retur new Promise(function(){})
+}
+return Promise.reject(error)
+return new Promise((resolve,reject)=>{
+reject('文章获取失败2')
+})
+}
+
+*************************************************************功能:发布文章******************************
+1.深度作用选择器
+/deep/
+由于scoped作用 标签本身会包含一个data-v-xxx的属性,使得css样式达到私有效果 
+通过深度作用选择器/deep/给B组件的某些标签设置样式
+.a /deep/ .b
+左边必须是当前组件的css选择器 右边是组件标签选择器
+
+2.表单校验
+1设置:rule='addFormRules'属性
+2给表单各项配置prop属性
+3给表单各项校验(data中)
+addFormRules{
+title:[required:true,message:'标题必填']
+}
+
+3.存储数据
+1创建发布按钮
+<el-from-item>
+<el-button type='primary' @click='addarticle(false)'>发布</el-button>
+<el-button @click='addarticle(true)'>存入草稿</el-button>
+</el-form-item>
+2写methods
+article(flag){
+this'.$refs.addFormRef.validate(valid=>{
+var pro = this.$http.post('/articles',this.addForm.{
+params:{draft:flag}
+})
+pro
+.then(result=>{
+this.$message.succes('发布文章成功')
+this.$router.push({name:article'})
+})
+.catch(err=>{
+return this.$message.err('发布文章失败')
+})
+}
+data(){
+return {
+type:0
+images:[]
+}
+}
+*******************************************************************删除文章
+json-bigint:把大整型的数字信息拆分 使用的时候再拼接为字符串
+1安装依赖包 npm add json-bigint
+2大数字具体处理:
+服务端给客户端返回的数据的第一手势转换器,转换器处理完毕后再交给响应拦截器,所以在转换器中转换
+import JSONbig from 'json-bigint'
+axios.defaults.transformRespinse=[function(data){
+if(data){
+//系统默认通过JSON.parse()处理 一定要设置else 服务器有时候会返回空字符串信息
+return JSONnbig.parse(data)
+}else{
+return data
+}
+}]
+3给文章的列表设置del()事件 同时传递被删除文件的id
+<el-button type='danger' size='min' @click='del(stData.row.id)'>删除</el-button>
+4给methods里定义逻辑
+del(id){
+this.confirm('确认要删除数据吗','删除',{
+confirmButtonText:'确定',
+cancelButtonText:'取消',
+type:"warning"
+}).then(()=>{
+let pro = this.$http.delete('/articles/${id}')
+pro
+.then(result=>{
+this.$message.success('文章删除成功')
+this.getArticleList()
+})
+.catch(err=>{
+return this.$message.error('err')
+})
+})
+}
+**********************************************************编辑文章
+1创建articleedit.vue组件/内容可以全盘复制添加文章/也相当于页面跳转不过格式一样 所以数据变化就ok
+2
+安装 npm i vue-quill-editor
+引入富文本编辑器css文件
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+导入富文本编辑器组件模块
+import {quilEditor} from  'vue-quill-editor'
+
+export default {
+name:'ArticleEdit',
+components:{
+quillEditor//简易赋值
+},
+引入data/将变量名改为:rule:editFormRules/:model:editForm
+
+3.创建路由
+{path:'/articleedit/:aid',
+name:'articleedit,
+component:
+}
+
+4.给文章列表设置修改按钮 设置事件 
+<template slot-scope='stData'>
+<el-button type='primary' size='mini' @click='$router.push(`/articleedit/${stData.row.id}`)">修改</el-button>
+
+5.展示修改文章内容
+computed:{
+aid(){
+return this.$router.parmas.aid
+}
+}
+
+6.修改文章存储入库
+在editarticle方法中 对应添加文章的addarticle方法 把之前post请求改为put请求 同时在请求地址中将aid设置好
+editarticle(flag){
+this.$refs.ediFormRef.validate(valid=>{
+if(valid{
+//get获取操作 post添加操作 put修改操作 delete删除操作
+let pro = this.$http.put(`/articles/${this.aid}`,this.editForm,{params:{draft:flag}})
+pro
+.then(result=>{
+if(result.data.message==='OK'){
+this.$router.push('/article')
+}
+})
+.catch(err=>{
+return this.$message.error('修改文章失败'+err)
+})
+})
+})
+}
+
+7.频道独立
+创建文件src/components/channel.vue
+通过添加文章组件把频道相关的4部分内容复制过来 并删除(el-select组件/data成员(chid,channelList)/getChannelList()方法/created/props[cid]/watch监听器[cid,chid])
+一父给子传值:(在父组件中设置传入值/即在当前页面传入值)
+父组件中:
+1import 子组件
+2用子组件的注册名字为标签名
+3通过子组件中定义的属性值传值
+子组件中:
+1用props接收父组件中传入的值
+props:{
+yan:{
+//将获取到的频道传递给子元素
+type:''//传入类型
+default:''//默认值
+}
+}
+2.将传入的值导入到父组件的属性中
+<button :style="{color:yan}">
+二子给父传值:
+父组件中:
+1import子组件
+2用子组件注册 
+3通过@向子组件中传递一个事件方法
+<com @slot = 'show'>
+...
+methods:{
+//事件中可以通过形参arg1/arg2在父组件的methods中定义好
+show(arg1,arg2){xxxx}
+}
+子组件中:
+1使用watch监听器监听子组件中属性值的变化
+2
+<el-select v-model='nowid'>
+...
+watch:{
+nowid(newV){
+//将选中的频道传递给父组件
+this.$emit('slt',newV)
+}
+}
+**************************************************************账户管理
+1创建组件account/account.vue
+2创建路由
+3创建页面基本结构
+<template>
+//卡片去
+<el-card class='box-card'>
+//命名插槽 头部内容
+<div slot='header' class='clearfix'>
+<span>账户信息</span>
+//匿名插槽 卡片主体
+<div class='text item carbody'>
+<div id='lt'>内容主体
+<el-form>form表单组件
+<div id=rt>头像展示区域
+4.实例部分
+export default{
+name:'Account',
+data(){
+return {
+accountForm:{
+id:'',//id
+name:''//名称
+mobile:''//手机
+email:''//邮箱
+intro:''//简介
+}
+}
+}
+}
+5.通过methods创建getAccountinfo通过axios获取账户信息并赋值给editForm成员
+getAccountInfo(){
+let pro = this.$http.get('/user/profile')
+pro
+.then(result=>{
+if(result.data.message==='OK'){
+this.accountForm = result.data.data
+}
+})
+.catch(err=>{
+return this.$message.error(err)
+})
+}
+6.在created中调用getAccountinfo方法
+7.表单校验 增加:rules属性
+8.修改账户存储入库
+1创建修改账户按钮并设置单机事件editAccount
+<el-button type='primary' @click='editAccount()'>更新账户
+2在methods中声明editAccount()方法 axios传递数据给服务器
+ editAccount(){
+this.$refs.accountFomrRef.validate(valid=>{
+if(valid){
+let pro = this.$http.patch('/user/profile',this.accountForm)
+pro
+.then(result=>{
+if(result.data.message===='OK'){
+this.$message.success('修改信息成功')
+}
+})
+}})
+}
+
+**********************************************************头像更新
+1.el-upload组件
+<el-upload
+action='http://xxxxxxx' //接收附件的服务端地址
+:show-file-list='false'//上传好的图片不要通过列表形式呈现
+:on-success='handleAvatarSuccess'//图片上传成功后的回调处理
+:http-request='httpRequest'//自定义上传行为 有了此属性可以胡烈action 和 on-success
+>
+<img v-if='imageUrl' :src='imageUrl' class='avatar'>//显示上传的图片
+<i v-else class='el-icon-plus avatar-uploader-icon'>//大+号图片
+
+<div id='rt'>
+<el-upload
+action='',
+:show-file-list = 'false'
+:http-request='httpRequest'//自定义上传行为
+>
+//判断是否有图片并展示 否则展示+号	
+<img v-if='accountForm.photo' :src='accountForm.photo' class='avatar' width='200' height='200'>
+<i v-else class='el-icon-plus avatar-uploader-icon'>
+2.在methods创建httpRequest()方法
+httpRequest(resource){
+//通过resource获取被上传图片对象
+let pic = resource.file
+//利用axios+Formdata实现图片上传
+let fd = new Formdata()
+//把图片加到fd对象里面
+fd.append('photo',pic)//名字 对象
+//上传
+let pro = thsi.$http({
+url:'/xxx',
+method:'patch',
+data:fd
+})
+pro
+.then(result=>{
+this.$message.success('头像更新成功')
+//更新
+this.accountForm.photo=result.data.data.photo
+})
+.catch(err=>{	
+	
+return this.$message.error(error)
+})
+}
+//Formdata 收通过new关键字创建一个空的FormData对象 然后使用append()方法向该对象里添加字段
+
+**********************************************************************同步更新账户信息
+1兄弟组件传值
+创建名称为src/untils/bus.js组件文件
+import Vue from 'vue'
+export default new Vue()
+2在account/home 中导入中介文件
+import bus from '@/untils/bus.js'
+3在首页home组件中,为用户名,头像,声明临时data成员,用于接收更新账户信息模拟响应式
+tmpname:''//临时账户名称
+tmpphoto:''//临时账户头像
+4在首页home组件中 给name和photo计算属性判断临时成员 存在就直接用否则用sessionStorage的账户信息
+computed:{
+name(){
+return this.tmpname||JSON.parse(window.sessionStorage.getItem('userinfo')).name}
+}
+5在home的created声明周期中 bus对象通过$on声明方法upAccountName和upAccountPhoto以便让account的bus调用进行数据更新
+created(){
+//对名称进行更新
+bus.$on('upAccountName',nm=>{
+//更新sessionStorage中的name信息
+let userinfo = JSON.parse(window.sessionStorage.getItem('userinfo'))
+userinfo.name=nm
+window.sessionStorage.setItem('userinfo',JSON.stringify(userinfo))
+//更新临时成员tmpname
+this.tmpname=nm
+})
+}
+6在账户account组件中 当账户名称更新后bus要通过$emit调用对应的方法(home组件给bus声明的)实现home页面更新
+//更新账户信息
+editAccount(){
+this.$refs.accountFormRef.validate(valid=>{
+if(!valid){
+return false
+}
+let pro = this.$http({
+url:'xxxx'
+method:'patch'
+data:this.accountForm
+})
+pro
+.then(result=>{
+//将名称传送给home 进行同步更新
+bus.$emit('upAccountName',this.accountForm.name)
+})
+})
+}
+//对头像进行更新
+@resource被上传头像图片的文件资源信息
+httpRequest(resource){
+let pic = resource.file
+let fd = new FormData()
+fd.append('photo',pic)
+let pro = this.$http({
+url:'xxx'
+method:'patch'
+data:fd
+})
+pro
+.then(result=>{
+bus.$emit('upAccountPhoto',result.data.data.photo)
+})
+}
+//上传表单对象的方法:new一个新的FormData对象 然后通过append()方法向对象里添加字段,发送axios请求时直接发送表单即可
+//兄弟传值
+1在定义一个bus.js 导入vue模块 import Vue from 'vue'
+2在兄弟模块组件中导入bus.js模块 import bus from '@/bus.js'
+3在*接收*数据的兄弟组件的created生命周期中声明使用bus.@on事件定事件成员方法
+created(){
+bus.$on('jieshou',data=>{
+console.log(data)
+})
+}
+3*发送*数据的组件中使用bus.$emit定义
+methods:{
+sendMsg(){
+bus.$emit('jieshou',100)
+}
+}
+
+*******************************************************************************************素材管理
+1创建组件material/index.vue组件
+2创建路由/material
+3home里面创建导航<el-menu-item index='/material'>
+4绘制素材列表
+设置el-card卡片区
+<template>
+<el-card class='box-card'>
+<div slot='header' class='clearfix'>
+<span>素材管理</span>
+<div class='text item'>
+<ul>
+<li class='image-box' v-for='item in 20' :key='item'>
+<img src='../../assets/logo.png' alt>
+</li>
+5设置css代码
+6获取真实素材图片
+1创建data成员imageList:[]
+2创建data成员querycdt 设置获取图片列表的条件
+querycdt:{
+collect:false,
+page:1,
+per_page:20
+}
+3创建getimageList方法获取图片信息并赋予给imageList
+getImageList(){
+let pro = this.$http({
+url:'xxx',
+method:'get',
+params:this.querycdt
+})
+pro.then(result=>{
+this.imageLsit=result.data.data.result
+})
+.catch(err=>{
+return this.$message.error(err)
+})
+}
+4在created钩子中进行调用
+5页面上做遍历获取
+<li class='image-box' v-for='item in imageList' :key='item.id'>
+***********************************************************************************上传素材图片
+1action设置地址
+2需要传递token信息 所以需要设置headers
+3通过name属性设置被上传图片的传递名字 服务器要求是image
+4:show-file-list='false'禁止形成列表效果
+5on-success文件上传后回调处理
+<el-upload
+  class="avatar-uploader"
+  action="https://jsonplaceholder.typicode.com/posts/"    //设置上传地址
+  :show-file-list="false"
+  :on-success="handleAvatarSuccess"
+  :before-upload="beforeAvatarUpload">
+  <img v-if="imageUrl" :src="imageUrl" class="avatar">
+  <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+</el-upload>
+<el-button>
+6在computed计算属性中给上传ajax设置token
+computed:{
+setToken(){
+let token = JSON.parse(window.sessionStorage.getItem('userinfo')).token
+return {Authorization:'Bear' + token}
+}
+}
+3在methods中制作onSuccess方法 等图片上传成功后提示并刷新
+onSuccess(){
+this.$message.success('图片上传成功')
+this.getImageList()//刷新图片
+}
+
+****************************************************************************发布文章封面处理
+1在添加文章articleadd/index.vue封面处绘制html代码
+<ul>
+<li class='uploadbox' v-for='item in covernum' :key='item'>
+<span>点击图标选择图片
+<div class='el-icon-picture-outline'>
+使图片数量与选取框对应上
+computed:{
+covernum(){
+if(this.addForm.cover.type>0){
+return this.addForm.cover.type
+}
+return 0
+}
+}
+
+****************************************************************************展示素材与对话框
+1对话框组件el-dialog
+<el-dialog
+  title="提示"
+  :visible.sync="dialogVisible"
+  width="30%"
+  :before-close="handleClose">
+  <span>这是一段信息</span>
+  <span slot="footer" class="dialog-footer">
+    <el-button @click="dialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+  </span>
+</el-dialog>
+:visible,sync='true/false' 限制当前对话框显示或隐藏
+2添加到文章组件中与el-form表单内容并列的后边绘制el-dialog组件内容
+3创建dialogVisible成员 默认为false
+3给选择框的li标签设置点击事件
+<li class='uploadbox' v-for='item in covernum' :key='item.id' @click='showDialog()'>
+4在methods里创建showDialog()方法展示对话框
+showDialog(){
+this.dialogVisible=true
+}
+4展示素材列表
+创建data成员
+ activeName: 'first', // 默认激活标签	
+ imageList: [], // 素材图片列表
+  // 获取素材图片的条件参数
+  querycdt: {
+    collect: false, // 非收藏图片
+    page: 1,
+    per_page: 12
+  }
+5调用getimageList方法
+6在dialog对话框中绘制ul/li标签
+<el-dialog title="提示" :visible.sync="dialogVisible" width="60%">
+  <!-- 标签切换效果 -->
+  <el-tabs v-model="activeName" type="card">
+    <el-tab-pane label="素材库" name="first">
+      <!-- 素材图片列表展示 -->
+      <ul>
+        <li class="image-box" v-for="item in imageList" :key="item.id">
+          <img :src="item.url" alt="没有图片">
+        </li>
+      </ul>
+    </el-tab-pane>
+   
+//标签切换
+ <el-tab-pane label="上传图片" name="second">
+      <el-button type="primary">上传图片</el-button>
+    </el-tab-pane>
+  </el-tabs>
+
+  <span slot="footer" class="dialog-footer">
+    <el-button @click="dialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+  </span>
+</el-dialog>
+***********************************************************************选取图片高亮展示
+  <li class="image-box" v-for="item in imageList" :key="item.id">
+    <img :src="item.url" alt="没有图片" @click="clkImage" >
+  </li>
+1在methods中定义clkimage事件方法
+clkImage(evt){
+//通过dom获取被点击的对象
+let lis = document.querySelectorAll('.image-box')
+for(var i=0;i<lis.length;i++){
+//将全部的border清除
+lis[i].style.border=''
+}
+//给当前选中的border设置边框
+let nowli=evt.target.parentNode
+nowlo.style.borde='5px solid green'
+}
+*********************************************************************记录选择框序号
+1data创建xu成员
+xu:0,//0第一个 1第二个 2第三个
+2给选择框单击事件传递序号信息 @click='showDialog(item)'
+<li class='uploadbox' v-for='item in covernum' :key='item.id' @click='showDialog(item)'>
+3methods方法showDialog(item)中要接收序号并赋予给xu成员,要进行减1操作
+//把遍历的item当做序号传递给事件方法 值是从1开始的接收后要做减1操作
+showDialog(n){
+this.xu=n - 1,
+this.dialogVisible=true//开启对话框
+}
+4记录选中图片
+1给data声明materialUrl成员
+2在clkImage方法中,把当前被单机选中的img标签的src属性值赋予给materialUrl成员
+clkImage(evt){
+let lis = document.querySelectorAll('.image-box')
+for(var i=0;i<lis.length;i++){
+lis[i].style.border=''
+}
+evt.target.parentNode.style.border='3px solid red'
+//把当前选中的src地址信息赋予给meterialUrl成员
+this.material=evt.target.src
+}
+
+*****************************************************************确定选取素材图片
+1给对话框确定按钮事件 @click='imageOK'
+<el-button type='primary' @click='imageOK'>确定
+2在方法中声明imageOK并把选择好的图片的地址赋予给添加文章的表单成员
+imageOK(){
+if(this.materialUrl){
+//给添加文章的表单域成员cover,images增加素材图片请求地址
+this.addForm.cover.images[this.xu]=this.materialUrl
+this.dialogVisible=false
+}
+}
+3展示选取的素材图片
+<ul>
+  <li class="uploadbox" v-for="item in covernum" :key="item.id">
+    <span>点击图标选择图片</span>
+    <img v-if="addForm.cover.images[item-1]" :src="addForm.cover.images[item-1]" alt="" />
+    <div v-else class="el-icon-picture-outline"></div>
+  </li>
+</ul>
+
+*************************************************************nprogress加载进度条
+1安装 npm i nprogress
+2引入路由
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+3在router路由中做具体配置
+路由前置守卫
+router.beforeEach((to,from,next)=>{
+NProgress.start()
+})
+router.afterEach((to,from)=>{
+NProgress.done()
+})
+4如果对进度条修改可在node_modules\nprogress\nprogress.css修改
+*********************************************************echarts表格
+1安装echarts功能包
+2创建路由组件fans/index.vue
+3创建路由导航
+4引入
+<template>
+  <el-card class="box-card">
+    <div slot="header" class="clearfix">
+      <span>粉丝统计</span>
+    </div>
+    <div id="main" ref="main2" style="width: 600px;height:400px;"></div>
+  </el-card>
+</template>
+5需要在mounted中调用(mounted此时页面容器已经编译好并渲染完成了)
+mounted(){
+this.paintPic()
+}
+6直接复制粘贴代码即可(需要将数据传入图表)
+myChart.setOption(option)//可多次传入
+
+
+******************************************************绘制阿贾克斯传入的数据的图表
+let dv = this.$refs.main2
+var myChart = echats.init(dv)
+
+$ref既可以获得组件对象 还可以获得html对象 与DOM获取表达意思相同
+/var myChart = echarts.init(document.getElementById('main'))
+
+1先aixos获取数据
+2输出result看想要的数据(所有阿贾克斯请求都一样)
+3将legend中的data和series中的data成员进行修改
+1获得对象的成员名称集合
+getkeys(obj){
+var keys1 = []
+for(var p1 in obj){
+//Object的hasOwnProperty()方法返回一个布尔值，判断对象是否包含特定的自身（非继承）属性。
+if(obj.hasOwnProperty(p1){
+keys.push(p1)
+}
+return keys
+}
+//动态获得服务器真是粉丝数据
+getFansStat(){
+let pro = this.$http({
+url:'xxx'
+method:'get'
+})
+pro
+.then(result=>{
+//1把legend的data数据通过result组织
+//调用上述方法 得到数组['le18','le23']
+let keys = this.getkeys(result.data.data.age)
+//2把series的data数据通过result组织
+let dataObj = []
+let ages = result.data.data.age
+for(var k in ages){
+dataObj.push({value:ages[k],name:k})//{ value: 335, name: '直接访问' }//效果相同 ages[k],k为值 json
+}
+let opt = {
+legend:{data:keys}
+},
+series:[{data:dataObj}]
+}
+this.myChart.setOption(opt)
+)
+}
+
+myChart对象在getFansStart中 访问不到 所以需要将mychart放入data成员中 然后通过this获取
+
+
+*******************************************************bug
+1路由跳转及刷新之后 高亮不变化及消失
+解决:
+home/index.vue中的el-manu中的:default-active="defaultActive"计算属性 控制高亮
+computed: {
+    //获取当前路由渲染页面菜单
+    defaultActive() {
+      let pathLength = this.$route.path.split("/").reverse();
+      // console.log(pathLength);
+      if (pathLength.length < 4) {
+        let path =
+          "/" +
+          this.$route.path.split("/").reverse()[1] +
+          "/" +
+          this.$route.path.split("/").reverse()[0];
+        return path;
+      } else {
+        let path1 =
+          "/" +
+          this.$route.path.split("/").reverse()[2] +
+          "/" +
+          this.$route.path.split("/").reverse()[1] +
+          "/" +
+          this.$route.path.split("/").reverse()[0];
+        return path1;
+      }
+    }
+————————————————
+此方法可解决多分页
+
+黑马头条中
+ defaultActive() {
+      console.log(this.$route.path);
+      return this.$route.path;
+      // console.log("/" + this.$route.path.split("/").reverse()[0]);
+
+      // return "/" + this.$route.path.split("/").reverse()[0];
+    },
+即可解决
+
+
+
+
+
+
+2如果不添加图片 并且在三图或一图的选择下发送 会得到错误码400
+可优化为
+if(err.response.status===400){
+return this.$message.error('请插入图片')
+}
+return this.$message.error('error')
+
+err.response错误的对象
+
+3删除或者编辑文章时候需要id 但是id长度超过规定长度了 所以需要下载大文件处理组件
+
+4:http-request='xxxx' //上传文件
+
+5:如何进入后直接进入登录界面
+设置路由守卫
+router.beforeEach((to,from,next)=>{
+//to:即将进入的路由对象
+//from:即将离开的路由
+})
+
+6.el-upload有两种上传文件方式
+
+一种直接el-upload标签中传入值
+:action//上传地址
+name//参数名称
+:headers='setToken'//表头 传递token
+:on-success//上传成功后的回调
+
+第二种:
+在标签中加:http-request='httpRequest'属性
+自定义上传
+httpRequest(resource){
+//通过resource获得被上传图片对象
+let pic = resource.file
+let fd = new FormData()
+fd.append('photo',pic)
+
+}
+
+7.el-dialog中:visible.sync='dialogVisible'可设置弹框显示隐藏
+通过在data成员中设置 然后添加点击事件 然后在方法中声明
+dialogVisible:false;
+this.dialogVisible=true 
+
+8.tabs标签页
+<el-tabs>
+<el-tab-pane>//分页
+
+9.将选中的图片展示在框内
+1确定选中图框的序号值(1)/this.xu = item
+2确定选中的图片的地址值(e.target.src)/this.material = e.target.src
+3将序号值存储在data中 xu:1/将选中图片的地址存储在data的cover.images[xu]中(形成一一对应的关系 第一个框对应第一个选中的图片)
+4展示在img标签的src地址中
+<img :src='form.cover.images[item]'>
+
+data中的xu material 只是用来存放变量
+
+1showDialog(item){this.xu=item}
+2selimage(evt){evt.target.src = this.materialUrl}
+3imageOK(){this.form.cover.images[this.xu]=this.materialUrl}
+4<img :src='form.cover.images[item]'>
+
+10.编辑页面跳转指定id
+1获取文章信息时将index设置成index='stData.row.id'
+2设置路由{path:'/article/:aid'}
+3在编辑页获取
+可先输出$route查看属性
+url:`/articles/${this.$route.params.path}`
+
+11.更换名字
+1首先通过axios将数据发送
+2然后将接收到数据发送给home分页(即兄弟传值)-先设置bus.js-然后兄弟界面引用-bus.$emit('changephoto',result.data.data.name)
+3home页在created中接收-
+created(){bus.$on('changename',nm=>{
+//nm为接收到的数据,账户信息存储在本地
+let uerinfo = JSON.parse(window.sessionStorage.getItem('changename'))
+userinfo.name = nm;
+//重新存储
+window.sessionStorage.setItem('userinfo',JSON.stringify(userinfo))
+//页面更新
+this.tmpname = nm
+})}
+更换头像
+1首先需要引用上传文件组件
+2上传文件组件有两种上传方式 第一种为各种信息写在标签内直接上传(素材管理上传图片)
+3在标签中设置:http-request='changephoto'属性(组件自带方法,覆盖自定义上传)
+4在方法中声明
+changephoto(resouce){
+//将文件放在表单内上传
+var fd = new FormData()
+//resouce为自带参数 resouce.file可获取到上传的文件信息
+var pic = resouce.file
+fd.append('photo',pic)
+//然后通过axios上传
+data:fd
+}
+5之后获取到result之后与更换名字相同
+//上传名字因为是在界面上直接改变赋值之后才上传所以不需要更改界面
+//上传图片需要在界面中展示出来 所以需要将上传的图片的地址赋值给img标签的src
+this.form.photo = result.data.data.phot
+this.$emit('changephoto',this.form.photo)
+
+12.设置前置路由守卫/后置路由守卫
+//如果没有登录默认切换到登录页
+router.beforeEach((to,from,next)=>{
+let userinfo = window.sessionStorage.getItem('userinfo')
+if('!userinfo&&to.path!=='/login'){
+return next('/login')
+}
+next()
+})
+
+router.afterEach((to,from)=>{
+})
+
+13.时间选择器"
+<el-date-picker
+v-model='timetotime'
+>
+//可以检测到日期的变化 参数newV为一个数组0是起始时间1是结束时间
+//获取到起始/结束时间之后再赋值给data
+watch:{
+timetotime(newV){
+this.form.begin=newV[0]
+this.form.end=newV[1]
+}
+}
+
+14.分页组价
+<el-pagination
+@size-change='handleSizeChange'//跳转之后显示的文章数
+@current-change = 'handleCurrentChange'//跳转之后的当前页数
+:current-page = 'form.page'//data中的当前页数
+:page-sizes='[10,20,30,40]'//设置显示10/20/30/40条每页
+:page-size='form.per_page'//data中的显示的文章数
+:total='tot'//文章总数
+>
+methods:{
+handleSizeChange(val){
+//可以记录点击之后跳转的页数 并把页数传递给data 然后通过axios发送获取当前页的数据
+this.form.page = val
+}
+handleCurrentChange(val){
+//可以记录跳转之后当前页显示的文章数 并传递给data 通过axios发送
+this.form.per_page = val
+}
+}
+
+//跳转页数信息发送之后需要发送给axios,此时需要通过深度监听来发现页面跳转实现页面更新
+watch:{
+form:{
+handler:function(newV,oldV){
+this.getArticleList()
+}
+//form中的变量是data中的form的成员 所以需要深度监听
+deep:true
+}
+}
+
+15.文章编辑地址aid
+1首先在router/index.js中设置当前的路由
+{path:'/home',name:'home',component:Hom,
+children:[
+{path:'/articleedit/:aid',name:'articleedit',component:Aed}
+]
+}
+2在编辑按钮中设置跳转 @clock='$router.push('/articleedit/${stData.row.id}')'
+<el-button
+@click = '$router.push(`/articleedit/${stData.row.id}`)'
+>修改</el-button>
+3修改之后的数据发送axios请求
+let pro = this.$http({
+method:'put',
+//$route.params.aid的值为stData.row.id的值 可先输出$route查看之后在写地址
+url:'/articles/${this.$route.params.aid}'
+data:this.form,
+params:{draft:flag}
+})
+
+16.文章删除
+1在按钮中添加删除点击事件 并传入id值 
+<el-button @click=del(stData.row.id)>
+2注册点击事件 并通过axios上传
+del(id){
+
+//confirm确认弹框
+this.$confirm('确认删除?','确认',{
+confirmButtonText:'确定',
+cancelButtontext:'取消',
+type:'warning'
+})
+.then(()=>{
+let pro = this.$http({
+url:'/articles/'+id,
+method:"delete"
+})
+}
+}
+
+17.单选组件
+<el-radio-group v-model='form.status'>
+<el-radio label>全部</el-radio>
+<el-radio :label='1'>草稿</el-radio>
+<el-radio :label='2'>待审核</el-radio>
+data(){
+return {
+//需要在label前加: 在status中赋值为数字1才有效/如不加 那么status中需要加引号
+//label中的值为status 是最终上传的数据 文字并不上传只是显示
+status:1
+}
+}
+
+18.文章状态组件
+//判断v-if  v-if-else
+<template slot-scope='stData'>
+<el-tag v-if='stData.row.status===1' type='success'>待审核
+<el-tag v-if-else = 'stData.row.status===2' type='primary'>审核通过
+
+19.极验验证
+1注册按钮事件
+<el-button
+@click = 'login()'
+:loading='isActive'
+:disabled='isActive'
+>
+2在data中存放一个存放极验的空对象
+data(){
+return {
+capObj:null
+}
+}
+
+login(){
+//表单校验
+this.$refs.form.validate(valid=>{
+if(valid){
+if(this.capObj!==null){
+//如果不为空那么直接调用显示
+return this.capObj.verify
+}
+//极验的地址
+let pro = this.$http.get(`/captcchas/${this.form.mobile}`);
+pro
+.then(result=>[
+//es6 解构赋值
+let {data} = result.data
+//直接复制粘贴
+window.initGeetest(
+{
+gt: data.gt,
+challenge: data.challenge,
+offline: !data.success,
+new_captcha: true,
+product: "bind"
+},
+captchaObj=>{
+captchaObj
+.onReady(()=>{
+this.isActive = false;
+//将对象赋值给变量存储 以便下次直接调用
+this.capObj = captchaObj
+//显示极验
+captchaObj.verify()
+})
+.onSuccess(()=>{
+//成功后发送axios验证登录
+//需要在loginAct中设置本地存储 
+//极验验证可参考部署文档
+this.loginAct()
+})
+}              
+)
+})
+}
+
+20.验证属性 false/true
+1:rules验证不能识别按钮的true/false 所以需要添加自定的验证属性
+2在标签中添加 prop='xieyi'
+3在data中声明
+data(){
+var xieyiTest(){
+var xieyiTest = function(rule,value,callback){
+//value 是否为true
+value?callback():callback(new Error('请遵守规矩'))
+}
+}
+
+return {
+form: {
+xieyi:false
+},
+rules:{
+xieyi:[{
+
+//validator为自定义的验证属性
+validator:xieyiTest
+}]
+}
+}
+}
+
+21.axios相应拦截器(获取文章时需要传送token 在这里设置token)
+//request.user 发送请求时使用
+axios.interceptors.request.use(function(reponse){
+let userinfo = window.sessionStorage.getItem('userinfo')
+if(userinfo){
+let token = JOSN.parse(userinfo).token
+//设置请求头 固定格式
+config.headers.Authorization = 'Bearer '+ token
+}
+return config
+},function(error{
+return Promise.reject(error)
+}))
+
+//response.use 响应拦截/收到数据时响应
+aixos.interceptors.response.use(function(response){
+return response
+},function(error){
+if(error.response.status===401){
+router.push('/login')
+return new Promise(function(){})//空的promise对象 没有机会自行catch 进而不足错误提示
+}
+return Promise.reject(error)
+}
+)
+
+22.删除文章或者编辑文章时候的id需要大数字组件
+1下载json-bigint
+2var JSONbig = require('json-bigint')
+axios.defaults.transformResponse = [{
+function(data){
+if(data){
+return JSONbig.parse(data)
+}
+return data
+}
+}]
+
+23.兄弟传值
+1需要将改变好的用户名同时更新在home上 此时需要兄弟间的传值
+2定义一个js文件 bus.js
+import vue form 'vue'
+export default new Vue()
+3在组件中分别引用 import bus from '@/xxx'
+4account需要传出
+在按钮的点击事件中注册
+changeuser(){
+pro.then(result=>{
+bus.$emit('changename',this.form)
+})
+}
+changephoto(){
+pro.then(result=>{
+this.$emit('changephoto',this.form.photo)
+})
+}
+4home中created中接收
+created(){
+bus.$on('changename',nm=>{
+let useinfo = JSON.parse(window.sesseionStorage.getItem('userinfo'))
+userinfo.name = nm
+window.sessionStorage.setItem('userinfo',JSON.stringify('userinfo'))
+this.tmpname = nm
+})
+}
+
+24.父子传值
+频道独立 此时需要将频道单独设立成一个子页 然后通过需要的父类引用
+1
+创建channel/channel.vue
+在所需要引用的
+import Channel form '@/xxx'
+在组件中申明
+components:{
+Channel
+}
+
+2
+子组件中
+<template>
+<el-select v-model='nowid'>
+<el-option v-for='item in channelLsit' :key='item.id' :label='item.name' :value='item.id'>
+</template>
+props:{
+//接收父亲的属性
+chid:{
+default:''
+}
+}
+data(){
+return {
+nowid:''
+}
+}
+watch:{
+//发送给父亲的值
+nowid(newV){
+this.$emit('slt',newV)
+}
+//获取父亲chid中的值
+chid(newV){
+//newV中的值为父组件中的form.channel_data
+this.nowid = newV
+}
+}
+
+
+
+
+父组件中
+<channel @slot='jieshou' :chid='form.channel_data'>
+methods:{
+//接收子的值
+jieshou(data){
+this.channel_id = data
+}
+
+
+vue中双击注册双击事件
+@dbclick=''
+
+搜索功能
+input里面加个button
+<el-button slot='append'>
+
+通过localStorage修改存储需要页面刷新之后才可以改变,如果不使用vuex要想实时更新需要通过v-model绑定个临时成员变量 这样就可以实时更新
+
+
+
+
+
+

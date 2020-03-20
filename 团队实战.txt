@@ -1,0 +1,173 @@
+1子修改父亲传过来的值(就是子给父传值)
+<more-dialog :title.sync='myTitle'>
+
+this.$emit('update:title','哈哈')
+
+2layout布局标签
+//el-row设置布局行
+//el-col设置布局列
+//:span设置各个列占据的宽度 满值24
+el-row/el-col
+<el-row :gutter='20'>
+<el-col :span='6'>
+
+3import {simple} from '@/api/hmmm/subjects' //结构赋值
+
+4.async await 异步处理函数
+async getaritcleLlst(){
+
+let result = await simple()
+
+}
+
+
+5引入城市 区
+因为城市需要进行方法判断 所以不能直接写data中 需要学methods然后通过()调用
+
+//必须有return 否则接收到的promise对象为undefined
+export const simple = data=>createAPI('xxxx','get',data)
+
+datas为一个数组 里面是一个对象
+export const provinces = ()=>{
+//item 为数组中的每一个元素对象
+return datas.map(item=>{
+return item.city
+})
+}
+
+6.for in 与for of
+数组中 for in拿到的是数组的下标
+for of拿到的是数组的元素
+
+var A = 'hello world'
+
+for(let i in A){
+conlog(i) 输出的是下标(0,1,2,3,...)
+}
+
+for(let i of A){
+console.log(i) 得到的是字符串的字符元素(h e l l o )
+}
+
+//对象不可以使用 for of
+var obj = {
+name:'alex',
+age:20
+}
+
+for(let i in obj) {
+i  //name,age
+}
+
+7通过城市 获取 区
+引入citys(),province()//因为是函数 所以需要加()
+1通过.map()对数组进行遍历 获取到选取的城市 赋值给data成员
+2通过@change事件 监听到城市的变化 然后将选中的城市的作为参数 @change='getCity(searchForm.province)'
+3getCitys(pname){
+this.searchForm.city = '',//清除之前选好的城市
+this.cityList = citys(pname)
+//citys 在js文件中有判断行为
+export const citys = pname=>{
+//for of 拿到的是数组中的元素
+//将选中的城市与数组中的城市对比 如果相同就返回对应的区
+for(const item of datas){
+if(item.city===pname){
+return item.area
+}
+}
+}
+}
+8.题型数字转汉字
+给el-table-column设置 :formatter属性(对内容进行二次更新,比如第一次获取到的是数字,通过设置这个属性将数字转为汉字)
+:formatter='qusetionTypeFMT' (questionFMT不设置括号 当前列内容受其返回值的影响)
+
+quesrionTypeFMT(row,column,cellValue,index){
+//row:代表当前每个数据项记录的信息 是一个对象
+{id:xx,number:xxx,difficulty:xxx} 可通过row获取当前所有项目的记录信息row.id row.number
+//通过slot-scope='stData' {{stData.row.id}}相同 只不过这个是将当前标签插到el-table-clumn的标签上再调用标签本身的row属性
+//column:可以获取记录的列的新 一般不用
+//cellValue:当前列的数据项目记录信息 类似row.quertionType/就是prop中获得的数字属性
+return this.questionTypeList[cellVue-1].label
+}
+思路:
+1因为后端给的是数字 所以需要给转成文字 即是接收后二次转 所以需要:formatter属性(格式化)
+2给注册方法
+<el-table-column :formatter:'questionTypeFMT'>
+methods:{
+questionTypeFMT(row,column,cellValue,index){
+return this.questionTypeList[cellValue-1].label
+}
+}
+3cellValue是与prop中的属性相对应的
+遍历时 prop='questionType' 此时questionType的值为2 namecellValue的值也为2
+4questionTypeList为从js中引入的数据 是判断类型的数组 我们需要其中的label值
+5
+我们得到的是2 2对应的是多选 所以需要数组中的第2个元素 即下角标为cellVue-1
+1单选2多选3简答 
+this.questionTypeList[cellVue-1].label
+
+
+9await async 
+async要加到 离saync最近的function前面
+
+10<a @click.prevent=''>.prevent阻止标签默认行为
+
+
+11
+//黑马头条
+<el-radio-group v-mode='singleSelect'>
+<el-radio :label='0'>
+
+此时 data中singkeSelect的值为0
+黑马头条项目中 需要上传的值为0-4 所以可以直接上传
+
+
+//面面中
+<el-radio-group v-model='singleSelect'>
+<el-radio :label='0'>
+<el-radio :label='1'>
+<el-radio :label='2'>
+<el-radio :label='3'>
+
+此时 singleSelect中的值也为选中的按钮中的值 加入第二个按钮选中 name singleSelect中的值就为1
+但是我们所需要的上传的数据为
+    options: [
+          { code: 'A', title: '', img: '', isRight: false },
+          { code: 'B', title: '', img: '', isRight: false },
+          { code: 'C', title: '', img: '', isRight: false },
+          { code: 'D', title: '', img: '', isRight: false }
+        ]
+所以需要对数据进行加工整理
+通过监听 获取选取到的值
+watch:{
+singleSelect(newV,oldV){
+//newV的值为收到的 1
+//先将所有的值都变为false
+for(var i = 0;i<4;i++){
+//排他功能
+this.options[i].isRight = false
+}
+//当前选中的变为true
+this.options[newV].isRight = true
+}
+
+}
+
+12v-model与:model去呗
+v-model双向绑定
+:model相当于v-bind:model的缩写/单向绑定 v-bind:model='form' 相当于把form中的值传递给model
+:model主要用于表单校验 :rules 校验model中的内容 如果不在el-form标签中写入:model则model为空 表单校验无法通过
+
+this.$refs.form.validate(valid=>{
+})
+
+
+
+
+
+
+
+
+
+
+

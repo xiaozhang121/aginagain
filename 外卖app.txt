@@ -1,0 +1,173 @@
+1.给vue标签添加过度动画效果
+加个transition标签包上操作的div 加name=fade属性
+.fade-enter-active,.fade-leave-active{
+transition opacity .5s
+}
+
+.fade-enter, .fade-leave-to{
+  opacity: 0;
+}
+
+
+
+功能:
+实现两个列表滑动,
+当前分类
+当滑动右侧列表 更新当前分类
+点击某个分类 右侧列表滑到对应位置
+
+
+
+
+npm install --save better-scroll
+在引用页面中:
+import BScroll from 'better-scroll'
+
+
+<li class='menu-item' v-for='(good,index) in goods' :key = 'index'
+:class = '{current: index===currentIndex}' @click='clickMenuItem'
+>
+
+<div class='wrapper'>
+<ul class='content' ref = foodsUl>
+<li>
+
+当content的高度 大于wrapper的时候形成滚动 div是可视区域 滚动的是ul
+
+在列表显示之后创建
+
+data(){
+return {
+scrollY,
+tops
+}
+}
+
+let scroll = new BScroll('观测的div')
+两种方式 1先watch在nextTick
+2
+向异步获取数据的dispatch中传入一个回调函数
+****************************
+mounted(){
+this.$store.dispatch('getShopGoods',()=>{//数据更新后执行
+//封装代码
+this._initScroll()
+this._initTops()
+})
+},
+
+*****************************
+methods:{
+
+//methods内一般放时间的回调函数的相关方法  _初始化方法
+
+************************//初始化滚动条
+_initScroll(){
+this.$nextTick(()=>{
+new BScroll('左侧类名',{
+scrollY:true,
+click:true //
+}) 
+
+this.foodScroll = new BScroll('.foods-wrapper(右侧类名)',{
+	prototype:2,//惯性滑动不会触发,
+	click:true
+})})
+//给右侧列表绑定scroll监听
+this.foodScroll.on('scroll',({x,y})=>{
+this.scrollY = Math.abs(y)
+})
+//5.优化:给右侧列表绑定结束监听(由于手势太大滑动失效的问题)
+this.foodScroll.on('scrollEnd',({x,y})=>{
+this.scrollY = Match.abs(y)
+}
+}
+********************//初始化tops
+_initTops(){
+1.初始化tops
+const tops = []
+let top = 0
+2.收集 找到所有分类的li
+const lis = this.$refs.foodsUl.getElementsByclassName('food-list-hook')
+Array.prototype.slice.call(lis).forEach(li=>{
+top +=li.clientHeight;
+tops.push(top)
+})
+3.更新top
+this.tops = tops
+}
+}
+
+**********************//给左侧注册
+clickMenuItem(index){
+const scrollY = this.tops[index]
+this.ScrillY = scrollY //点击以后高亮立即生效
+this.foodScroll.scrollTo(0,-scrollY,300(事件 /ms))
+
+}
+*****************************
+
+
+4.计算得到当前分类的下标 
+computed:{
+currentIndex(){
+//得到条件数据
+const {scrollY,tops}=this
+//根据条件计算产生的结果
+const index = tops.findIndex((top,index){
+return scrollY=>top&&scrollY<tops[index+1]
+})
+//返回结果
+return index
+}
+}
+
+
+async getShopGoods({commit},callback){
+const result = await reqShopGoods()
+if(result.code===0){
+const goods = result.data
+commit(RECEIVE_GOODS,{good})
+//数据更新了 通知下一个组件
+callback && callback() //可传可不传
+}
+}
+
+
+
+2.
+操作获取到的对象如果新增属性没有数据绑定效果则使用:
+Vue.set(food,'count',1)参数:对象 属性名(字符串) 值
+
+3.父组件调用子组件的方法:
+this.$refs.food.toggleShow()--->在子组件标签上定义的方法
+
+4.购物车底边栏:
+1.通过计算属性添加高亮类名
+如果当前的总值=0 则返回最小起送值 不添加高亮
+如果当前总值大于0小于其送值 return起送值-总值 添加高亮
+如果大于 则reurn 就算
+2.修改之前的点击添加功能
+添加
+if(!food.count){
+food.count = 1 //如果没有则点击之后数量变为1
+//新增功能:建立一个新数组 将food添加到cartFoods新数组中
+state.cartFoods.push(food)
+}else{
+food.count++ //如果有 点击一次+1
+state.cartFoods.push(food)
+}
+减少:
+if(food.count){
+food.count--
+if(food.count===0){
+state.cartFoods.splice(state.cartFoods.indexOf(food),1)
+}
+}
+ 
+
+
+
+
+
+

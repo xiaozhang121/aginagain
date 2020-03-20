@@ -1,0 +1,2 @@
+es6模块化导出
+require与import区别

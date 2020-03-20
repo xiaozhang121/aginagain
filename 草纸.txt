@@ -1,0 +1,33 @@
+1.什么是js?
+js是一种直译式脚本语言(直译式脚本语言是指不需要机器转码,直接通过解释器,边解释边执行,一般以文本形式存在的语言都是脚本语言),属于弱类型,动态类型,基于原型的语言.它的解释器被称为js引擎,是浏览器的一部分,最早用在html界面上,用来给界面增加动态功能.js兼容于ECMA标准,因此也称为ECMAscript;
+
+2.js的本地对象,内置对象和宿主对象?
+1*.本地对象为array,obj,regexp等可以通过new实例化;
+2*.内置对象为gload,Math不可以实例化;
+3*.宿主为浏览器自带的document,window;
+
+3.js的内置对象有哪些?array和string的常用方法?
+
+js常见的内置对象有Object,Math,Array,Number,Funcetion,Boolean,Json等;Object是所有对象的基类,采用了原型继承方法;
+
+String: indexOf();match();replace();search();     toLowerCase();
+Array:shift();unshift();pop();splice();slice();
+
+4.列举3种强制类转换和2种隐式类型转换?
+强制:parseInt(),parseFloat(),Number();
+隐式:==,console.log(),alert();
+
+5.操作DOM常用的API:
+1*.节点查找 document.getElementById();
+2*.节点创建 createElement     cloneNode;0
+
+3*.节点修改 appendChild       insertBefore      RemoveChild       replaceChild
+4*.元素属性型 setAttribute     getAttribute
+
+6.BOM常用API
+
+navigator: window中封装浏览器属性和配置信息的对象;
+cookieEnabled:识别浏览器是否启用cookie,返回值布尔类型;(cookie存储用户本地数据的文件);
+userAgent:保存了浏览器名称和版本的字符串;
+
+闭包的理解:

@@ -1,0 +1,447 @@
+1文章获取页多写几次
+
+*******************************************************************************vant组件:
+1.顶部导航栏
+<van-nav-bar
+title='标题'
+left-text='返回'//左侧返回键
+right-text='按钮'//可作为左侧搜索功能
+left-arrow //左箭头
+@click-left='$router.back()'//左侧点击按钮返回
+@click-right='onClickRight'//右侧按钮点击事件
+>导航栏
+如果将搜索按钮转为图标则需要插槽
+<van-nav-bar>
+<van-icon name='search' slot='right'>
+2.底部标签栏
+<van-tabbar v-model='active'/route>
+<v-tabbar-item 
+to='/question'  //跳转路由
+icon='home-o'
+dot //展示有更新的小红点
+info='5' //更新小红点中的数量
+active-color="#07c160" //自定义选中颜色
+inactive-color="#000" //自定义字体颜色
+@change = 'onChange' //监听切换事件
+>标签</van-tabbar-item>
+3.skeleton骨架屏
+<van-skeleton
+title //通过title属性显示占位图
+:row='3' //通过row属性配置字占位段落行数
+avatar //显示头像占位图
+:loading='loading' //loading属性设置成false表示内容加载完成此时会隐藏占位图,并显示skeleton的子组件
+>
+<div>实际内容</div>
+</van-skeleton>
+data(){
+return{
+loading:true
+}},
+mounted(){
+this.loading= false //页面渲染完成 内容显示
+}
+4.van-cell-group 分组标题
+5.van-filed输入框表单域
+filed是基于cell实现的 可以使用cell作为父元素提供外边框
+<van-cell-group>
+<van-filed 
+v-model='value' 
+placeholder='请输入用户名' 
+label='用户名'
+required:不进行检验设置表单域前边有红星
+clearable:表单域内容可以通过叉号清除
+>
+内嵌式按钮(发验证码用)
+<van-button slot='button' type='primary' size='small'> 
+6.v-button按钮
+<van-button
+type:按钮样式
+size:按钮大小
+round:圆的/square方的
+:loading:'isLogin': 加载状态 
+loading-text='加载中'
+block:块级元素展示/独占一行
+>
+7.van-tab标签页
+<van-tabs v-model='active'>
+<van-tab title='推荐'>推荐内容展示
+v-model:默认选中的标签
+
+8.van-list 下拉列表
+<div class='scroll-wrapped'> //固定容器
+<van-list 
+v-model='loading'  //是否处于加载状态 加载过程中不触发load事件
+:finished='finished'  //是否已加载完成 加载完成后不再触发load事件
+finished-text='没有更多了' //加载完成后的提示文案
+@load='onLoad'  //滚动条与底部距离小于offset时触发
+>
+<van-cell v-for = 'item in list' :key='item' :title='item'>
+methods:{
+onLoad(){
+//异步更新数据
+setTimeout(()=>{
+for(let i = 0;i<10;i++){
+this.list.push(this.list.length+1) //每次累加到10,执行后续代码,然后再从头开始累加,知道finished为true才会停止
+}
+this.loading = false //加载状态结束
+if(this.list.length>=40){
+this.finished =true
+}
+})
+}
+}
+
+9.van-gird宫格(显示图片用)
+需要添加一个van-cell标签  van-cell中存放新闻名 :title='item.title'
+//如果图片数大于0,那么显示的宫格数就为图片数
+<van-gird v-if='item.cover.type>0' :column-num='item.cover.type'>
+//遍历数组创造宫格宫格---item2每一个对象/k2的下标
+<van-gird-item v-for='(item2,k2) in item.cover.images' :key='k2'>
+<van-image width='90' height='90' :src='item2'>
+<van-gird-item>
+
+10.van-dialog弹出框
+可创建van-icon图标 <van-icon name='close' style='float:right' @click='displayDialog()'>
+封装在子组件中 父组件点击是触发
+<more-action v-model='showDialog'>
+子组件中:
+<template>
+<van-dialog
+:value='value'
+:show-confirm-button='false' //是否确定取消出按钮
+@input='$emit('input')' //向父组件传值
+clise-on-click-overlay //点击任意位置关闭
+>
+方法使用参见方法中的v-model使用原理
+
+
+11.注册组件的两种方式
+Vue.user与Vue.component
+1.
+import Add from '@/add.vue'
+export default(Vue)=>{
+Vue.component(Add.name,Add)
+Vue.组件引入的名字(组件名,组件)
+}
+2.
+Vue.use(Add)
+Vue.user(plugin),plugin格式为{install:function(){}},则运行install方法,若plugin本身是function则直接运行
+
+Vue.component才是真正的去注册组件
+很多ui库用Vue.use来注册是因为plugin的install的方法中执行了Vue.component
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+**************************************************************逻辑实现方法
+7.axios,vuex,localStorage,api之间的联系
+1新建aurh.js,用来封装getitem/setitem/removeitem信息
+
+2新建vuex并引入auth.js,在vuex中对引用localStorage更改之后在别的地方不再对localStorage进行更改,之后导出
+
+3新建request.js引入vuex文件, 用来封装新建的axios对象 axios.created 配置大数字处理/并配置请求(配置token)/响应拦截器(对接收到的数据401进行处理)
+发送请求前需要设置bearer信息前缀 config.headers.Authorization='Bearer '+store.state.user.token
+错误码401之后需要对vuex中的store.state.user.token进行判断
+
+4创建api接口,新建user.js,引入request.js用来存放用户的请求信息
+import request from '@/request.js'
+
+export function apiupdateUser (function({mobile,code}){
+return request({
+url:'xxx',
+method:'xx'
+data:{
+mobile,
+code
+}
+})
+}
+)
+导出之后在vue的界面直接调用apiupdageUser就可以直接获取里面return的值
+export导出需要使用{ apiupdateUser }来接收
+export default默认导出动作,只能有一个可以命名直接接收
+
+8.vue/login界面登录使用上述方法案例
+1首先给按钮注册点击事件
+2然后在方法中声明,因为封装方法后返回的是一个promise对象 所以需要用async(放在await最近的函数前面) await异步使用
+3methods:{
+async login(){
+try{
+const result= await apiupdateUser(this.form)
+this.$store.commit('updateuser',result) //vuex维护token vuex全局注册不需要import
+this.$totast.success('登陆成功') //this.$toast.success/fail vant成功失败提示
+this.$router.push('/')
+}
+catch(err){
+this.$toast.fail('账号信息错误')
+}
+}
+}
+
+9.表单校验
+1安装npm i vee-validate
+2创建独立的untils/validate/js导入默认校验规则
+import { extend } from 'vee-validate'
+import * as rules from 'vee-validate/dist/rules'
+// rules: {alpha:xx,alpha_dash:xx,alpha_num:xx……}
+Object.keys(rules).forEach(rule => {
+  extend(rule, rules[rule])
+})
+// Object.keys(rules) 获得对象中全部的属性名称，
+// 并以数组返回["alpha", "alpha_dash", "alpha_num", ……]
+// extend(rule, rules[rule]) 完成每个内置校验规则的注册操作
+3main.js中引入验证独立文件
+import '@/untils/validate'
+4.登录组件使用
+1导入相关模块
+import {ValidationProvider} from 'vee-validate'
+在组件中引入
+components:{
+validationprovider
+}
+2在需要验证的组件上添加<validationprovider>标签包起来
+并配置属性
+<validationprovider
+v-slot='{errors}' //接收错误信息 v-slot只能用在组件或者template标签上/slot-scope可以用在组件 普通html标签 template标签上
+rules='required' //定义检验规则
+name:手机号码 //定义校验字段名称
+>
+3将英文提示改为中文(默认为英文)
+在validate中配置
+import {extend,localize} from 'vee-validate'//引入localize语言模块
+import * as rules from 'vee-calidate/dist/rules' //引入所有规则
+
+import zhCN from 'vee-validate/dist/local/zh_CN.json'//引入中文语言包
+
+localize({zhCN})//注册语言包
+localize('zhCN')//设置默认语言
+4此校验只能校验是否填写 如果验证格式 需要添加自定义规则
+在validate.js文件中
+extend('phone',{
+validate:value=>{
+let reg = /^1[35789]\d{9}$/
+retunr reg.test(value)
+},
+message:'{_field_}'格式不正确
+})
+在标签中添加
+rules='required|phone'
+5点击登录时检验 
+引入注册
+import {validationProvider,validationObserver} from 'vee-validate'
+components:{
+validationprovider,
+validationobserver
+}
+给van-cell-group添加一个总标签围起来
+<validationobserver ref='loginfromref'>
+<van-cell-group>
+登录检验
+async login(){
+const valid = await this.$refs.loginformref.validate()
+if(!valid){
+return false
+}
+}
+
+10.加载提示
+给button添加:loading='islogin' loading-text='登录中'
+在data中声明 islogin=false
+校验通过后 this.islogin = true
+请求完成后 this.islogin=false
+
+11.延迟加载中的promise函数
+//promise数显原理
+new Promise((resolve, reject) =>{
+    setTimeout(() =>{
+        //成功的时候调用resolve
+        resolve('成功data')
+        //失败的时候调用reject
+        reject('error message')
+    }, 1000)
+}).then((data) =>{
+    //处理成功后的逻辑
+    console.log(data);//这个data 是接收的resolve参数--
+}).catch((err) =>{
+    console.log(err);
+})
+
+Vue.prototype.$sleep = time => {
+  return new Promise((resolve) => {
+    window.setTimeout(() => {
+	//参数为事件 事件到了之后.then的执行结果为resolve() 这里只是为了起倒计时的功能
+      resolve()
+    }, time)
+  })
+}
+
+async onload (){
+await this.$sleep(800) // await 直接调用reslove的值 暂停0.8s
+}
+
+12.过滤器/与验证原理相同
+Vue.filter('过滤器名称',function(){逻辑代码})
+需要先遍历过滤器文件
+Object.keys(filters).forEach(item => {
+  console.log(filters) //是一个module对象 里面包含的是所有的过滤器的对象
+  Vue.filter(item, filters[item]) //名称 对应其方法
+})
+过滤器的使用
+{{数据属性名称 | 过滤器名称}}
+
+//写入过滤器文件->main.js中引入
+/多个文件则需要遍历Object.keys(filters).forEach(item=>{
+Vue.filters(item,filters[item]) 注册
+})
+13.v-model的使用原理
+<more-dialog v-model='showDialog'>
+实际上
+<more-dialog :value='showDialog' @input='showDlialog=xxxx'>
+获取input输入的内容 输入的内容给value 子组件再获取值
+子组件:
+<van-dialog :value='value' @input='$emit('input')'>
+//如果是普通的input标签 则需要@input ='$emit('input',$event.target.value)'
+@input='$emit('input')' 表示van-dialog要调用当前组件的oninput事件,并把本身的value值传递,是一种变形的设置语法,van-dialog内部有额外补充内容
+props:{
+value:{
+type:Boolean,
+default:false
+}
+}
+
+子修改父组件数据/子给父传值
+父:
+<more-dialog :title='mytitle'>
+子:
+this.$emit('title','修改父组件的值')
+//会报错 不推荐
+父:
+<more-dialog :title='mytitle' @xingai='(val)=>{this.mytitle=val}')>
+子:
+this.$emit('update:title','hah')
+//可以修改
+优化之后:
+父:
+<more-dialog :title.sync='mytitle'>
+子:
+this.$emit('update:title','哈哈')
+给title绑定:title.sync='mytitle'的样子就是对 :title='mytitle' @update:title='(val)=>{this.mytitle=val}'的封装
+
+父:
+<my v-model='nowvalue'>
+子:
+<input type='text' :value='value' @input='$emit('input',$event.target.value)'>
+props:[value]
+
+项目中的原理是:
+
+父组件
+	data  -->  nowvalue: 'abcd'
+	<my-input v-model="nowvalue"></my-input>
+	<my-input @input='(val)=>{this.nowvalue=val}'></my-input>
+子组件
+	<input type="text" :value="value" @input="$emit('input',$event.target.value)" />
+	props: ['value']
+
+父组件:
+<more-action v-model='showDialog'>
+实际转化后
+<more-action :value='showDialog' @onchange='showDialog=xxx'>
+子组件:
+prop:{
+value:{
+type:Boolearn,
+default:false
+}
+}
+
+父组件中
+给默认的icon按钮注册点击事件,点击之后事件为真,传值给子组件
+<van-icon @click='displayDailog()'>
+methods:{
+displayDialog(){
+this.showDialog = true
+}
+}
+
+<more-action v-model='showDialog'>
+子组件中:
+子组件中通过props接收到value的值,然后将值赋值给自己的属性:value中 
+van-dialog中的:value控制弹框的显示隐藏
+<van-dialog
+:value='value'
+>
+此时一级弹框显示,此时二级弹框默认为隐藏 false
+通过给一级弹框加入属性v-if='!isReportShow'
+给二级弹框加入v-else
+在data中声明
+data(){
+return {
+isReportShow:false
+}
+}//只要显示弹框 一级弹框默认显示
+给一级弹框的某个标签添加点击事件 点击则改变isReport为true
+点击之后二级弹框显示
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

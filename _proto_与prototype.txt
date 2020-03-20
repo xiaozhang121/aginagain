@@ -1,0 +1,18 @@
+function Foo(){}
+let f1 = new Foo()
+
+prototype只有函数才能拥有
+_proto_对象拥有
+constor(构造器)只有prototype对象才能有 但是每个对象都能找到对应的_constor
+
+所以
+原型链:
+f1的_proto_指向Foo.prototype(实例对象的对象原型指向该构造函数的原型对象)
+Foo.prototype的_proto_指向Object.prototype
+Function.prototype的_proto_指向Objec.prototype
+
+
+Foo()的_proto-指向Function.prototype
+Function()的_proto_指向Object.prototype
+
+Object.prototype的_proto_指向null

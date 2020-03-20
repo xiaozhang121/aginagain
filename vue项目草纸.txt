@@ -1,0 +1,4 @@
+1配置axios
+import axios from 'axios' 
+axios.defaults.baseURL = 'xxxxxxxxxxxxx'
+Vue.prototype.$http = axios

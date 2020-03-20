@@ -1,0 +1,15 @@
+注册全局组件。
+使用Vue.component()方法注册全局组件。
+第一个参数是自定义元素名称，也就是将来在别的组件中使用这个组件的标签名称。
+第二个参数是将要注册的Vue组件。
+import Vue from 'vue'
+//引入组件
+import Loading from './loading.vue'
+//将loading注册为全局组件 在别的组件中通过loading标签来使用
+Vue.component('loaidng',Loading)
+
+使用Vue.use注册插件。
+这个方法接收一个参数。这个参数必须具有install方法。Vue.use函数内部会调用参数的install方法。
+如果插件没有被注册过，那么注册成功之后会给插件添加一个installed的属性值为true。Vue.use方法内部会检测插件的installed属性，从而避免重复注册插件。
+插件的install方法将接收两个参数，第一个是参数是Vue，第二个参数是配置项options。
+在install方法内部可以添加全局方法或者属性、全局指令、mixin混入、添加实例方法、使用Vue.component()注册组件等
